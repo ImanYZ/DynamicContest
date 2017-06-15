@@ -11,6 +11,7 @@
 {% block blockcontent %}
   <div class="transBackground">
     <p style="margin-top:40px;" class="questionP">Tell us why you quit:</p>
+    <textarea class="form-control" rows="5" id="WhyQuit">{{ why_quit }}</textarea>
     <p class="questionP">Do you think this game was feasible? If your guess is correct, you will earn an extra ${{ quit_question_earning }}.</p>
     <div id="WasFeasibleYesDIV" class="radio lb-lg label {% if WasFeasibleYes %}disabled {% if WasFeasibleYes == 1 or WasFeasibleYes == 2 %}label-success{% else %}{% if WasFeasibleYes == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
       <label><input type="radio" id="WasFeasibleYes" name="WasFeasible" value="Yes" {% if WasFeasibleYes %}disabled {% if WasFeasibleYes == 2 or WasFeasibleYes == -2 %} checked="checked"{% endif %}{% endif %}></label>
@@ -35,7 +36,7 @@
       <div class="col-xs-4 ">
       </div>
       <div class="col-xs-4 ">
-        {% if phase and phase == 'quiz' %}
+        {% if phase and phase == 'quitquestion' %}
             <a id="WasFeasibleContinue" href="{% url 'knapsack:training' %}?userGameId={{ userGameId }}" class="btn btn-lg btn-success">Continue</a>
         {% else %}
             <button id="SubmitBtn" type="submit" class="btn btn-lg btn-success">Submit</button>
@@ -117,7 +118,8 @@
                 errorInPage = true;
             }
             if (!errorInPage) {
-                window.location.href = ("{% url 'knapsack:quitquestion' %}?WhyQuit=" + WhyQuit +
+                window.location.href = ("{% url 'knapsack:quitquestion' %}?userGameId={{ userGameId }}" +
+                    '&WhyQuit=' + WhyQuit +
                     '&feasible=' + feasible + '&infeasible=' + infeasible +
                     '&notSure=' + notSure);
             }

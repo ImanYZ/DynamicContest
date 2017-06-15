@@ -1545,25 +1545,25 @@ def quitoption(request):
             currentuserGame.quit = True
             currentuserGame.finished = timezone.now()
             currentuserGame.save()
-            context = {'userGameId': request.GET['userGameId'], 'quit_question_earning': quit_question_earning}
-            print("\n\nEntered the if part.")
+            context = {'username': username, 'userGameId': request.GET['userGameId'],
+                       'quit_question_earning': quit_question_earning}
             return render(request, 'knapsack/QuitQuestions.html', context)
+    print("\n\nEntered the if part.")
     context = {'username': ''}
     return render(request, 'knapsack/index.html', context)
 
 
 def quitquestion(request):
-    if request.method == 'POST':
-        requestPost = json.loads(request.body.decode('utf-8'))
+    if request.method == 'GET':
         if request.session.get('username', False):
             username = request.session['username']
             user = User.objects.get(username=username)
-            usergame = Usergame.objects.get(pk=requestPost['userGameId'])
+            usergame = Usergame.objects.get(pk=request.GET['userGameId'])
             infeasibility = usergame.game.infeasible
             correct = False
-            responseInfeasible = convertNum2Bool(requestPost['infeasible'])
-            responseFeasible = convertNum2Bool(requestPost['feasible'])
-            responseNotSure = convertNum2Bool(requestPost['notSure'])
+            responseInfeasible = convertNum2Bool(request.GET['infeasible'])
+            responseFeasible = convertNum2Bool(request.GET['feasible'])
+            responseNotSure = convertNum2Bool(request.GET['notSure'])
             WasFeasibleNo = -1
             WasFeasibleYes = -1
             WasFeasibleNotSure = -1
@@ -1592,13 +1592,15 @@ def quitquestion(request):
             userquitquestion = Userquitquestion.objects.create(
                 user=user,
                 usergame=usergame,
-                why_quit=requestPost['WhyQuit'],
+                why_quit=request.GET['WhyQuit'],
                 feasible=responseFeasible,
                 infeasible=responseInfeasible,
                 notsure=responseNotSure,
                 correct=correct)
-            context = {'WasFeasibleYes': WasFeasibleYes, 'WasFeasibleNo': WasFeasibleNo,
-                       'WasFeasibleNotSure': WasFeasibleNotSure, }
+            context = {'username': username, 'userGameId': request.GET['userGameId'], 'WasFeasibleYes': WasFeasibleYes,
+                       'WasFeasibleNo': WasFeasibleNo,
+                       'WasFeasibleNotSure': WasFeasibleNotSure, 'why_quit': request.GET['WhyQuit'],
+                       'phase': 'quitquestion'}
             return render(request, 'knapsack/QuitQuestions.html', context)
     context = {'username': ''}
     return render(request, 'knapsack/training.html', context)
