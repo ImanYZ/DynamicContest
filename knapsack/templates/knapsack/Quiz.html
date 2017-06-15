@@ -35,6 +35,10 @@
       I am not sure.
     </div>
     <br><br>
+    <div id="GroupSizeError" class="alert alert-danger" style="display: none;">
+      <strong>Required!</strong> Please make a choice.
+    </div>
+    <br><br>
     <p class="questionP">In the contest phase, are you going to play against the same opponent more than once?</p>
     <div class="radio lb-lg label {% if SameOpponentYes %}disabled {% if SameOpponentYes == 1 or SameOpponentYes == 2 %}label-success{% else %}{% if SameOpponentYes == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
       <label><input type="radio" name="SameOpponent" id="SameOpponentYes" value="Yes" {% if SameOpponentYes %}disabled {% if SameOpponentYes == 2 or SameOpponentYes == -2 %} checked="checked"{% endif %}{% endif %}></label>
@@ -51,6 +55,10 @@
       I am not sure.
     </div>
     <br><br>
+    <div id="SameOpponentError" class="alert alert-danger" style="display: none;">
+      <strong>Required!</strong> Please make a choice.
+    </div>
+    <br><br>
     <p class="questionP">True or false: An infeasible game can be solved if I try hard enough.</p>
     <div class="radio lb-lg label {% if InfeasibleIsSolvableTrue %}disabled {% if InfeasibleIsSolvableTrue == 1 or InfeasibleIsSolvableTrue == 2 %}label-success{% else %}{% if InfeasibleIsSolvableTrue == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
       <label><input type="radio" name="InfeasibleIsSolvable" id="InfeasibleIsSolvableTrue" value="True" {% if InfeasibleIsSolvableTrue %}disabled {% if InfeasibleIsSolvableTrue == 2 or InfeasibleIsSolvableTrue == -2 %} checked="checked"{% endif %}{% endif %}></label>
@@ -65,6 +73,10 @@
     <div class="radio lb-lg label {% if InfeasibleIsSolvableNotSure %}disabled {% if InfeasibleIsSolvableNotSure == 1 or InfeasibleIsSolvableNotSure == 2 %}label-success{% else %}{% if InfeasibleIsSolvableNotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
       <label><input type="radio" name="InfeasibleIsSolvable" id="InfeasibleIsSolvableNotSure" value="NotSure" {% if InfeasibleIsSolvableNotSure %}disabled {% if InfeasibleIsSolvableNotSure == 2 or InfeasibleIsSolvableNotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
       I am not sure.
+    </div>
+    <br><br>
+    <div id="InfeasibleIsSolvableError" class="alert alert-danger" style="display: none;">
+      <strong>Required!</strong> Please make a choice.
     </div>
     <br><br>
     <p class="questionP">True or false: In a contest, you are told that “the chance that Game 1 is feasible is 100%.” This means that
@@ -84,6 +96,10 @@
       I am not sure.
     </div>
     <br><br>
+    <div id="SureGameError" class="alert alert-danger" style="display: none;">
+      <strong>Required!</strong> Please make a choice.
+    </div>
+    <br><br>
     <p class="questionP">In a contest, you are told that “the chance that Game 1 is feasible is 60%.” Which of the following statements
         are correct?</p>
     <div class="radio lb-lg label {% if Feasible60Infeasible40 %}disabled {% if Feasible60Infeasible40 == 1 or Feasible60Infeasible40 == 2 %}label-success{% else %}{% if Feasible60Infeasible40 == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
@@ -99,6 +115,10 @@
     <div class="radio lb-lg label {% if Feasible60NotSure %}disabled {% if Feasible60NotSure == 1 or Feasible60NotSure == 2 %}label-success{% else %}{% if Feasible60NotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
       <label><input type="radio" name="Feasible60" id="Feasible60NotSure" value="NotSure" {% if Feasible60NotSure %}disabled {% if Feasible60NotSure == 2 or Feasible60NotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
       I am not sure.
+    </div>
+    <br><br>
+    <div id="Feasible60Error" class="alert alert-danger" style="display: none;">
+      <strong>Required!</strong> Please make a choice.
     </div>
     <br><br>
     <div class="row" style="margin-bottom:40px;">
@@ -173,15 +193,23 @@
           var GroupSizeNotSure = 0;
           if (GroupSize == "3") {
             GroupSize3 = 1;
+            $("#GroupSizeError").hide();
           }
           else if (GroupSize == "4") {
             GroupSize4 = 1;
+            $("#GroupSizeError").hide();
           }
           else if (GroupSize == "12") {
             GroupSize12 = 1;
+            $("#GroupSizeError").hide();
           }
           else if (GroupSize == "NotSure") {
             GroupSizeNotSure = 1;
+            $("#GroupSizeError").hide();
+          }
+          else {
+            $("#GroupSizeError").show();
+            errorInPage = true;
           }
           var SameOpponent = $('input[name=SameOpponent]:checked').val();
           var SameOpponentYes = 0;
@@ -189,12 +217,19 @@
           var SameOpponentNotSure = 0;
           if (SameOpponent == "Yes") {
             SameOpponentYes = 1;
+            $("#SameOpponentError").hide();
           }
           else if (SameOpponent == "No") {
             SameOpponentNo = 1;
+            $("#SameOpponentError").hide();
           }
           else if (SameOpponent == "NotSure") {
             SameOpponentNotSure = 1;
+            $("#SameOpponentError").hide();
+          }
+          else {
+            $("#SameOpponentError").show();
+            errorInPage = true;
           }
           var InfeasibleIsSolvable = $('input[name=InfeasibleIsSolvable]:checked').val();
           var InfeasibleIsSolvableTrue = 0;
@@ -202,12 +237,19 @@
           var InfeasibleIsSolvableNotSure = 0;
           if (InfeasibleIsSolvable == "True") {
             InfeasibleIsSolvableTrue = 1;
+            $("#InfeasibleIsSolvableError").hide();
           }
           else if (InfeasibleIsSolvable == "False") {
             InfeasibleIsSolvableFalse = 1;
+            $("#InfeasibleIsSolvableError").hide();
           }
           else if (InfeasibleIsSolvable == "NotSure") {
             InfeasibleIsSolvableNotSure = 1;
+            $("#InfeasibleIsSolvableError").hide();
+          }
+          else {
+            $("#InfeasibleIsSolvableError").show();
+            errorInPage = true;
           }
           var SureGame = $('input[name=SureGame]:checked').val();
           var SureGameTrue = 0;
@@ -215,12 +257,19 @@
           var SureGameNotSure = 0;
           if (SureGame == "True") {
             SureGameTrue = 1;
+            $("#SureGameError").hide();
           }
           else if (SureGame == "False") {
             SureGameFalse = 1;
+            $("#SureGameError").hide();
           }
           else if (SureGame == "NotSure") {
             SureGameNotSure = 1;
+            $("#SureGameError").hide();
+          }
+          else {
+            $("#SureGameError").show();
+            errorInPage = true;
           }
           var Feasible60 = $('input[name=Feasible60]:checked').val();
           var Feasible60Infeasible40 = 0;
@@ -228,12 +277,19 @@
           var Feasible60NotSure = 0;
           if (Feasible60 == "Infeasible40") {
             Feasible60Infeasible40 = 1;
+            $("#Feasible60Error").hide();
           }
           else if (Feasible60 == "Target40") {
             Feasible60Target40 = 1;
+            $("#Feasible60Error").hide();
           }
           else if (Feasible60 == "NotSure") {
             Feasible60NotSure = 1;
+            $("#Feasible60Error").hide();
+          }
+          else {
+            $("#Feasible60Error").show();
+            errorInPage = true;
           }
           if (!errorInPage) {
             window.location.href = ("{% url 'knapsack:quizsubmit' %}?GroupSize3=" + GroupSize3 +

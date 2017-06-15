@@ -1534,6 +1534,24 @@ def gamesubmit(request):
     return render(request, 'knapsack/training.html', context)
 
 
+def quitoption(request):
+    print("\n\nEntered Quit option.")
+    if request.method == 'GET':
+        if request.session.get('username', False):
+            username = request.session['username']
+            user = User.objects.get(username=username)
+            quit_question_earning = user.experiment.quit_question_earning
+            currentuserGame = Usergame.objects.get(pk=request.GET['userGameId'])
+            currentuserGame.quit = True
+            currentuserGame.finished = timezone.now()
+            currentuserGame.save()
+            context = {'userGameId': request.GET['userGameId'], 'quit_question_earning': quit_question_earning}
+            print("\n\nEntered the if part.")
+            return render(request, 'knapsack/QuitQuestions.html', context)
+    context = {'username': ''}
+    return render(request, 'knapsack/index.html', context)
+
+
 def quitquestion(request):
     if request.method == 'POST':
         requestPost = json.loads(request.body.decode('utf-8'))
@@ -1581,25 +1599,9 @@ def quitquestion(request):
                 correct=correct)
             context = {'WasFeasibleYes': WasFeasibleYes, 'WasFeasibleNo': WasFeasibleNo,
                        'WasFeasibleNotSure': WasFeasibleNotSure, }
-            return JsonResponse(context)
+            return render(request, 'knapsack/QuitQuestions.html', context)
     context = {'username': ''}
     return render(request, 'knapsack/training.html', context)
-
-
-def quit(request):
-    if request.method == 'POST':
-        requestPost = json.loads(request.body.decode('utf-8'))
-        if request.session.get('username', False):
-            username = request.session['username']
-            user = User.objects.get(username=username)
-            currentuserGame = Usergame.objects.get(pk=requestPost['userGameId'])
-            currentuserGame.quit = True
-            currentuserGame.finished = timezone.now()
-            currentuserGame.save()
-            context = {}
-            return JsonResponse(context)
-    context = {'username': ''}
-    return render(request, 'knapsack/index.html', context)
 
 
 def survey(request):
