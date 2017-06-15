@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack {% if phase == 'game' or phase == 'contest' %}Contests{% else %}Training{% endif %} Results!{% endblock %}
+
+{% block headertitle %}{% if phase == 'game' or phase == 'contest' %}Contests{% else %}Training{% endif %} Results{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <h1 class="WelcomeTitle"><img src="{% static 'knapsack/media/mochila_Orange.svg' %}" alt="Knapsack Game Logo" width="70px" height="70px" style="max-width:100px; margin-top: -25px;">Knapsack Game!</h1>
+    <div style="margin-top:40px;">
+        <p>You finished 
+        {% if phase == 'survey' %}
+          the survey phase.
+        {% else %}
+          {% if phase == 'contest' %}
+            the contest phase.
+          {% else %}
+            {% if phase == 'game' %}
+              {{ contestIndex }} of the {{ contestsNum }} contest{{ contestsNum|pluralize }}.
+            {% else %}
+                {% if phase == 'training' %}
+                  the training phase.
+                {% else %}
+                  the review questions.
+                {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        </p>
+        <p>You earned ${% if total_training_score %}{{ total_training_score }}{% else %}0{% endif %} from the training phase.</p>
+        {% if quiz_score %}
+          <p>You earned ${{ quiz_score }} from the review questions.</p>
+        {%endif%}
+        {% if total_game_score %}
+          <p>You earned ${{ total_game_score }} from the contest phase.</p>
+        {%endif%}
+        {% if quit_question_earning %}
+          <p>You earned ${{ quit_question_earning }} from the quit option questions.</p>
+        {%endif%}
+        <p>You earned a participation fee of $5.</p>
+        <p>In total, you earned ${% if total_earning %}{{ total_earning }}{% else %}0{% endif %}. {% if survey_phase %}<span style="color:red;">Please enter this amount in the HUMAN SUBJECT INCENTIVE RECEIPT form and fill out the form completely.</span>{% endif %}</p>
+        {% if phase == 'training' %}
+        <p>Based on your performance in the training phase (your score combined with speed), you will be placed in a <strong>group of 4 players with similar skill levels</strong>. Before you enter a contest, you will go to the <strong>waiting page</strong> until everyone in your group is in the waiting page, ready to start the next contest.</p>
+        <p>The contest phase consists of <strong>3 contests</strong>. In each contest, you will compete with a different player in your group. Each contest consists of 2 sequential knapsack games. Each game is finished if you can fit the target value (or higher) into the knapsack. You cannot play Game 2 unless you finish Game 1. The player who finishes Game 2 first wins a prize of $5.0.</p>
+        {%endif%}
+        {% if phase == 'contest' %}<p>In the next phase, you'll answer a number of survey questions.</p>{% endif %}
+        <p>Click the "{% if phase == 'training' %}Go to the Contest Phase Instructions{% else %}{% if phase == 'game' %}Start the Next Contest{% else %}{% if phase == 'contest' %}Start the Survey{% else %}{% if phase == 'quiz' %}Start the First Contest.{% else %}Logout{% endif %}{% endif %}{% endif %}{% endif %}" button to {% if not phase == 'survey' %}continue{% else %}finish the experiment{% endif %}.</p>
+    </div>
+    <div class="row" style="margin-bottom:40px; margin-top:40px; ">
+      <div class="col-xs-4 ">
+      </div>
+      <div class="col-xs-2 ">
+        <a id="StartBtn" href="{% if phase == 'training' %}{% url 'knapsack:contestintro' %}{% else %}{% if phase == 'game' %}{% url 'knapsack:waitingroom' %}{% else %}{% if phase == 'contest' %}{% url 'knapsack:survey' %}{% else %}{% if phase == 'quiz' %}{% url 'knapsack:waitingroom' %}{% else %}{% url 'knapsack:logout' %}{% endif %}{% endif %}{% endif %}{% endif %}" class="btn btn-lg btn-success">{% if phase == 'training' %}Go to the Contest Phase Instructions{% else %}{% if phase == 'game' %}Start the Next Contest{% else %}{% if phase == 'contest' %}Start the Survey{% else %}{% if phase == 'quiz' %}Start the First Contest.{% else %}Logout{% endif %}{% endif %}{% endif %}{% endif %}</a>
+      </div>
+      <div class="col-xs-6 ">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+      $('#StartBtn').one('click', function(){
+        event.preventDefault();
+        window.location = $('#StartBtn').attr('href');
+      });
+
+    });
+  </script>
+{% endblock %}

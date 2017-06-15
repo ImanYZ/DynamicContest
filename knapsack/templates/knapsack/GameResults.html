@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack {% if trainingNum %}Training {{ trainingNum|apnumber }}{% else %}{% if gameNum %}Contest {{ gameNum|apnumber }}{% endif %}{% endif %} Results{% endblock %}
+
+{% block headertitle %}{% if gameNum %}Contest {{contestIndex}} out of {{totalContestsNum}}, Game {{ gameNum }} out of {{ totalGameNum }}{% else %}{% if trainingNum %}{% if contestMode %}Quit Training Game {{ quitTrainingNum }}{% else %}Training Game {{ trainingNum }} out of {{ totalTrainingNum }}{% endif %}{% endif %}{% endif %} Results{% endblock %}
+
+{% block blockcontent %}
+  <div id="ItemsTitle">
+    Best Solution that you could have in your knapsack
+  </div>
+  <div id="ItemsContainer" style="border:4px solid #D8D8D8;">
+  </div>
+<!--   <div id="HintsExplanation">
+    Hover your mouse on items and the <br>right-hand side information to see hints.
+  </div> -->
+  <div id="KnapsackItemsTitle">
+    Your solution:
+  </div>
+  <div id="KnapsackItemsContainer">
+  </div>
+  <div id="KnapsackItemsStats" style="top:58px;">
+    <div style="color:#FFC178; font-weight:bold;" title="You tried to maximize the total value of items in your knapsack.">
+      <!-- <p id="KnapsackValueHint">Tried to maximize</p> -->
+      <p>Your value: $<span id="KnapsackValue">0</span></p>
+    </div>
+    <p title="Shows the maximum total value of items you could have in your knapsack.">Max value: $<span id="MaxKnapsackValue">{{ optimal_score }}</span></p>
+    <!--<p id="ScoreExplanation">Earning = {% if gameNum and gameNum > 6 %}2 &#215; {% else %}{% if trainingNum and trainingNum > 6 %}2 &#215; {% endif %}{% endif %}Your value / Max value</p>-->
+    <p title="Shows your final earning from this round of the game.">Your earned: $<span id="Score">{{ score }}</span></p>
+    <p title="Shows the final total weight of items in your knapsack.">Final weight: <span id="KnapsackWeight">0</span> Kg</p>
+    <p title="Shows the weight left in your knapsack that you could put items in.">Weight left: <span id="KnapsackWeightLeft">0</span> Kg</p>
+    <p title="Shows the weight capacity of your knapsack.">Maximum weight: <span id="KnapsackCapacity">0</span> Kg</p>
+    <div id="SubmitBtnContainer" title="Click the Continue button to go to continue.">
+      <a id="StartBtn" href="../{% if gameNum %}game{% else %}training{% endif %}/?{% if contestMode %}userGameId={{ userGameId }}{% else %}userTrainingId={{ userTrainingId }}{% endif %}" class="btn btn-xlarge btn-success">Continue...</a>
+    </div>
+  </div>
+
+  <div id="SubmitCountdown">
+  </div>
+
+{% endblock %}
+
+{% block scontent %}
+
+  <!-- JavaScript code for this project -->
+  <script>
+    window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//again because google chrome don't insert first hash into history
+    window.onhashchange=function(){window.location.hash="no-back-button";}
+
+    $.fn.textWidth = function(){
+      var html_org = $(this).html();
+      var html_calc = '<span>' + html_org + '</span>';
+      $(this).html(html_calc);
+      var width = $(this).find('span:first').width();
+      $(this).html(html_org);
+      return width;
+    };
+
+    var modalObj;
+
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+
+      function adaptFontSizes() {
+        var windowWidth = $( window ).width();
+        var windowHeight = $( window ).height();
+
+        $( "#ItemsTitle" ).css("font-size", (windowHeight / 4.9) + "%");
+        // $( "#HintsExplanation" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackItemsTitle" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( "#MaxKnapsackValue" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#Score" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#ScoreExplanation" ).css("font-size", (windowHeight / 4.9) + "%");
+        // $( "#KnapsackValueHint" ).css("font-size", (windowHeight / 4.9) + "%");
+        // $( "#KnapsackItemsStats" ).css("line-height", (windowHeight / 4) + "%");
+        $( "#KnapsackValue" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackWeight" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackWeightLeft" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackCapacity" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#CountdownTitle" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( ".btn-xlarge" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( ".btn-xlarge" ).css("padding", (windowHeight / 160) + "% " + (windowHeight / 130) + "%");
+        $( ".countdownHolder" ).css("font-size", (windowHeight / 4) + "%");
+        $( ".Value" ).css("font-size", (windowHeight / 9.1) + "%");
+        $( ".Weight" ).css("font-size", (windowHeight / 9.1) + "%");
+
+        return [windowWidth, windowHeight];
+      }
+
+      function AdaptItemsText(items, listName, windowHeight) {
+        for (i = 0; i < items.length; i++) {
+          ItemWidth = $( "#Item" + listName + items[i] ).css("width");
+          ItemWidth = parseFloat(ItemWidth.substring(0, ItemWidth.length - 2));
+          $("#Item" + listName + items[i]).find(".Value").css("font-size", (windowHeight / 9.1) + "%");
+          $("#Item" + listName + items[i]).find(".Weight").css("font-size", (windowHeight / 9.1) + "%");
+          if (ItemWidth < $("#Item" + listName + items[i]).find(".Value").textWidth()) {
+            var decreasingRate = 0.01;
+            var decreasingCoefficient = 1;
+            while (ItemWidth <= $("#Item" + listName + items[i]).find(".Value").textWidth()) {
+              $("#Item" + listName + items[i]).find(".Value").css("font-size", (windowHeight / (9.1 + decreasingCoefficient*decreasingRate)) + "%");
+              $("#Item" + listName + items[i]).find(".Weight").css("font-size", (windowHeight / (9.1 + decreasingCoefficient*decreasingRate)) + "%");
+              decreasingCoefficient += 2.5;
+            }
+          }
+        }
+      }
+
+      var availableItems = [];
+      var kanpsackItems = [];
+
+      // Items setup.
+      var capacity = {{ capacity }};
+      $("#KnapsackCapacity").html(capacity);
+      $("#KnapsackWeightLeft").html(capacity);
+      var items = [{'value':{{ value_0 }}, 'weight':{{ weight_0 }}, 'inBag':{{ inBag_0|yesno:"true,false" }}, 'optimal':{{ optimal_0|yesno:"true,false" }}, 'length':0}];
+      {% if value_1 != 0 or weight_1 != 0 %}
+        items.push({'value':{{ value_1 }}, 'weight':{{ weight_1 }}, 'inBag':{{ inBag_1|yesno:"true,false" }}, 'optimal':{{ optimal_1|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_2 != 0 or weight_2 != 0 %}
+        items.push({'value':{{ value_2 }}, 'weight':{{ weight_2 }}, 'inBag':{{ inBag_2|yesno:"true,false" }}, 'optimal':{{ optimal_2|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_3 != 0 or weight_3 != 0 %}
+        items.push({'value':{{ value_3 }}, 'weight':{{ weight_3 }}, 'inBag':{{ inBag_3|yesno:"true,false" }}, 'optimal':{{ optimal_3|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_4 != 0 or weight_4 != 0 %}
+        items.push({'value':{{ value_4 }}, 'weight':{{ weight_4 }}, 'inBag':{{ inBag_4|yesno:"true,false" }}, 'optimal':{{ optimal_4|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_5 != 0 or weight_5 != 0 %}
+        items.push({'value':{{ value_5 }}, 'weight':{{ weight_5 }}, 'inBag':{{ inBag_5|yesno:"true,false" }}, 'optimal':{{ optimal_5|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_6 != 0 or weight_6 != 0 %}
+        items.push({'value':{{ value_6 }}, 'weight':{{ weight_6 }}, 'inBag':{{ inBag_6|yesno:"true,false" }}, 'optimal':{{ optimal_6|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_7 != 0 or weight_7 != 0 %}
+        items.push({'value':{{ value_7 }}, 'weight':{{ weight_7 }}, 'inBag':{{ inBag_7|yesno:"true,false" }}, 'optimal':{{ optimal_7|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_8 != 0 or weight_8 != 0 %}
+        items.push({'value':{{ value_8 }}, 'weight':{{ weight_8 }}, 'inBag':{{ inBag_8|yesno:"true,false" }}, 'optimal':{{ optimal_8|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_9 != 0 or weight_9 != 0 %}
+        items.push({'value':{{ value_9 }}, 'weight':{{ weight_9 }}, 'inBag':{{ inBag_9|yesno:"true,false" }}, 'optimal':{{ optimal_9|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_10 != 0 or weight_10 != 0 %}
+        items.push({'value':{{ value_10 }}, 'weight':{{ weight_10 }}, 'inBag':{{ inBag_10|yesno:"true,false" }}, 'optimal':{{ optimal_10|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_11 != 0 or weight_11 != 0 %}
+        items.push({'value':{{ value_11 }}, 'weight':{{ weight_11 }}, 'inBag':{{ inBag_11|yesno:"true,false" }}, 'optimal':{{ optimal_11|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+
+      modalObj = modalObj || (function () {
+          var pleaseWaitDiv = $('<div class="modal fade" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h1>The game is being loaded!</h1></div><div class="modal-body"><div class="progress progress-striped active"><div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%"><span class="sr-only">100% Complete</span></div></div></div></div></div></div></div>');
+          return {
+              showPleaseWait: function() {
+                  pleaseWaitDiv.modal();
+              },
+              hidePleaseWait: function () {
+                  pleaseWaitDiv.modal('hide');
+              },
+
+          };
+      })();
+
+      modalObj.showPleaseWait();
+
+      setTimeout( function() {
+        var windowSizes = adaptFontSizes();
+        var windowWidth = windowSizes[0];
+        var windowHeight = windowSizes[1];
+
+        var itemsContainerLeft = $( "#ItemsContainer" ).css("left");
+        var itemsContainerLeftPercent = parseFloat(itemsContainerLeft.substring(0, itemsContainerLeft.length - 2)) * 100 / windowWidth;
+        var ItemsTitleTop = $( "#ItemsTitle" ).css("top");
+        var ItemsTitleTopPercent = parseFloat(ItemsTitleTop.substring(0, ItemsTitleTop.length - 2)) * 100 / windowHeight;
+        var ItemsTitleHeight = $( "#ItemsTitle" ).css("height");
+        var ItemsTitleHeightPercent = parseFloat(ItemsTitleHeight.substring(0, ItemsTitleHeight.length - 2)) * 100 / windowHeight;
+        var itemsContainerTopPercent = ItemsTitleTopPercent + ItemsTitleHeightPercent;
+        $( "#ItemsContainer" ).css("top", itemsContainerTopPercent + "%");
+        var itemsContainerWidth = $( "#ItemsContainer" ).css("width");
+        var itemsContainerWidthPercent = parseFloat(itemsContainerWidth.substring(0, itemsContainerWidth.length - 2)) * 100 / windowWidth;
+
+        var totalWeight = 0;
+        for (i = 0; i < items.length; i++) { 
+            totalWeight += items[i]['weight'];
+        }
+        for (i = 0; i < items.length; i++) { 
+            items[i]['length'] = items[i]['weight'] * itemsContainerWidthPercent / totalWeight;
+        }
+        var kanpsackLength = capacity * itemsContainerWidthPercent / totalWeight;
+        $( "#KnapsackItemsContainer" ).css("width", kanpsackLength + "%");
+        $( "#ItemsContainer" ).css("width", kanpsackLength + "%");
+
+        var totalknapsackValue = 0;
+        var totalknapsackWeight = 0;
+        var totalknapsackLength = 0;
+
+        var totalAvailableValue = 0;
+        for (i = 0; i < items.length; i++) { 
+            totalAvailableValue += items[i]['value'];
+        }
+        var totalAvailableWeight = totalWeight;
+        var totalAvailableLength = itemsContainerWidthPercent;
+
+        var knapsackContainerLeft = $( "#KnapsackItemsContainer" ).css("left");
+        var knapsackContainerLeftPercent = parseFloat(knapsackContainerLeft.substring(0, knapsackContainerLeft.length - 2)) * 100 / windowWidth;
+        var knapsackContainerTop = $( "#KnapsackItemsContainer" ).css("top");
+        var knapsackContainerTopPercent = parseFloat(knapsackContainerTop.substring(0, knapsackContainerTop.length - 2)) * 100 / windowHeight;
+
+        var prviousItem = $( "#SubmitCountdown" );
+        var currentLeft = itemsContainerLeftPercent;
+        for (i = 0; i < items.length; i++) { 
+          if ( items[i]['optimal'] ) {
+            var newSpan1 = jQuery('<div/>', {
+              class: 'Value',
+              text: "$" + items[i]['value'],
+            });
+            var newSpan2 = jQuery('<div/>', {
+              class: 'Weight',
+              text: items[i]['weight'] + " Kg",
+            });
+            var Table = jQuery('<div/>', {
+              class: 'Table',
+            });
+            Table.append(newSpan1);
+            Table.append(newSpan2);
+            var newItem = jQuery('<div/>', {
+              id: 'ItemOptimal' + i,
+              title: "$" + items[i]['value'] + '<br>'
+                + items[i]['weight'] + " Kg" + '<br>', 
+              class: 'Item',
+              style: "top:" + itemsContainerTopPercent + "%; height:16%; left:" + currentLeft + "%; width:" + items[i]['length'] + "%;"
+            });
+            newItem.tooltip({placement: 'bottom',
+              html: true,
+            });
+            newItem.append(Table);
+            prviousItem.after(newItem);
+            prviousItem = newItem;
+            currentLeft += items[i]['length'];
+            availableItems.push(i);
+          }
+        }
+
+        var currentLeft = itemsContainerLeftPercent;
+        for (i = 0; i < items.length; i++) { 
+          if ( items[i]['inBag'] ) {
+            var newSpan1 = jQuery('<div/>', {
+              class: 'Value',
+              text: "$" + items[i]['value'],
+            });
+            var newSpan2 = jQuery('<div/>', {
+              class: 'Weight',
+              text: items[i]['weight'] + " Kg",
+            });
+            var Table = jQuery('<div/>', {
+              class: 'Table',
+            });
+            Table.append(newSpan1);
+            Table.append(newSpan2);
+            var newItem = jQuery('<div/>', {
+              id: 'Item' + i,
+              title: "$" + items[i]['value'] + '<br>'
+                + items[i]['weight'] + " Kg" + '<br>', 
+              class: 'Item',
+              style: "top:" + knapsackContainerTopPercent + "%; height:16%; left:" + currentLeft + "%; width:" + items[i]['length'] + "%;"
+            });
+            newItem.tooltip({placement: 'bottom',
+              html: true,
+            });
+            newItem.append(Table);
+            prviousItem.after(newItem);
+            prviousItem = newItem;
+            currentLeft += items[i]['length'];
+            kanpsackItems.push(i);
+            totalknapsackValue += items[i]['value'];
+            $("#KnapsackValue").html(totalknapsackValue);
+            totalknapsackWeight += items[i]['weight'];
+            $("#KnapsackWeight").html(totalknapsackWeight);
+            $("#KnapsackWeightLeft").html(capacity - totalknapsackWeight);
+            var iWidth = $("#Item" + i).css("width");
+            totalknapsackLength += parseFloat(iWidth.substring(0, iWidth.length - 2))* 100 / windowWidth;
+            totalAvailableValue -= items[i]['value'];
+            totalAvailableWeight -= items[i]['weight'];
+            totalAvailableLength -= parseFloat(iWidth.substring(0, iWidth.length - 2))* 100 / windowWidth;
+          }
+        }
+
+        AdaptItemsText(availableItems, 'Optimal', windowHeight);
+        AdaptItemsText(kanpsackItems, '', windowHeight);
+
+        $( "#MaxKnapsackValue" ).parent().tooltip({placement: 'left', html: true });
+        $( "#Score" ).parent().tooltip({placement: 'left', html: true });
+        $( "#KnapsackValue" ).parent().parent().tooltip({placement: 'left', html: true });
+        $( "#KnapsackWeight" ).parent().tooltip({placement: 'left', html: true });
+        $( "#KnapsackWeightLeft" ).parent().tooltip({placement: 'left', html: true });
+        $( "#KnapsackCapacity" ).parent().tooltip({placement: 'left', html: true });
+        // $( "#countdown" ).tooltip({placement: 'left', html: true });
+        $( "#SubmitBtnContainer" ).tooltip({placement: 'left', html: true });
+
+        modalObj.hidePleaseWait();
+      }, 1000);
+
+      $( window ).resize(function() {
+        modalObj.showPleaseWait();
+
+        setTimeout( function() {
+          var windowSizes = adaptFontSizes();
+          windowWidth = windowSizes[0];
+          windowHeight = windowSizes[1];
+
+          ItemsTitleTop = $( "#ItemsTitle" ).css("top");
+          ItemsTitleTopPercent = parseFloat(ItemsTitleTop.substring(0, ItemsTitleTop.length - 2)) * 100 / windowHeight;
+          ItemsTitleHeight = $( "#ItemsTitle" ).css("height");
+          ItemsTitleHeightPercent = parseFloat(ItemsTitleHeight.substring(0, ItemsTitleHeight.length - 2)) * 100 / windowHeight;
+          itemsContainerTopPercent = ItemsTitleTopPercent + ItemsTitleHeightPercent;
+          $( "#ItemsContainer" ).css("top", itemsContainerTopPercent + "%");
+          for (i = 0; i < availableItems.length; i++) {
+            $("#ItemOptimal" + availableItems[i]).css("top", itemsContainerTopPercent + "%");
+          }
+          AdaptItemsText(availableItems, 'Optimal', windowHeight);
+          AdaptItemsText(kanpsackItems, '', windowHeight);
+
+          modalObj.hidePleaseWait();
+        }, 1000);
+      });
+
+    });
+
+  </script>
+{% endblock %}

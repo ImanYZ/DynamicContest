@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack {% if total_training_score %}training{% else %}contest{% endif %} results!{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <h1 class="WelcomeTitle"><img src="{% static 'knapsack/media/mochila_Orange.svg' %}" alt="Knapsack Game Logo" width="70px" height="70px" style="max-width:100px; margin-top: -25px;">Knapsack Game!</h1>
+    <div style="margin-top:40px;">
+        <p>Congratulations! You successfully finished the {% if total_training_score %}training{% else %}contest{% endif %} phase.</p>
+        <p>You earned a total score of ${% if total_training_score %}{{ total_training_score }}{% else %}{% if total_game_score %}{{ total_game_score }}{% else %}0{% endif %}{% endif %}.</p>
+        {% if total_training_score or total_training_score == 0 %}
+          <p>In the next phase, you'll play the game
+            {% if game_number == 1 %}
+              once
+            {% else %}
+              {% if game_number == 2 %}
+                twice
+              {% else %}
+                {% if game_number >= 3 %}
+                  {{ game_number|apnumber }} times
+                {% endif %}
+              {% endif %}
+            {% endif %}
+            with randomly selected 
+            {% if player_number == 1 %}
+              another
+            {% else %}
+              {% if player_number == 2 %}
+                two other
+              {% else %}
+                {% if player_number >= 3 %}
+                  {{ player_number|apnumber }}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+            player{{ player_number|pluralize }}. Among those who score above the winning score, the player with the highest score wins.</p>
+          <p>You'll have a limited amount of time to complete each game. When the time is over, you will automatically go to the next game. If you found your desired solution earlier, you can click the "Submit" button to continue.</p>
+          <p>Click the "Let's start..." button to start the contest phase.</p>
+        {% endif %}
+    </div>
+    <div class="row" style="margin-bottom:40px; margin-top:40px; ">
+      <div class="col-xs-5 ">
+      </div>
+      <div class="col-xs-2 ">
+        <a id="StartBtn" href="{% if total_training_score %}{% url 'knapsack:game' %}{% else %}{% url 'knapsack:survey' %}{% endif %}" class="btn btn-lg btn-success">Let's Start...</a>
+      </div>
+      <div class="col-xs-5 ">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+    });
+
+  </script>
+{% endblock %}

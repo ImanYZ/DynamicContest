@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Welcome to the Knapsack Contest!{% endblock %}
+
+{% block headertitle %}Introduction{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <h1 class="WelcomeTitle"><img src="{% static 'knapsack/media/mochila_Orange.svg' %}" alt="Knapsack Game Logo" width="70px" height="70px" style="max-width:100px; margin-top: -25px;">Knapsack Game!</h1>
+    <div style="margin-top:40px;">
+        <p>Welcome! This experiment includes 3 phases:</p>
+        <ol>
+          <li><strong>Training phase</strong>: you'll play the game
+            {% if training_number == 1 %}
+              once
+            {% else %}
+              {% if training_number == 2 %}
+                twice
+              {% else %}
+                {% if training_number >= 3 %}
+                  {{ training_number|apnumber }} times
+                {% endif %}
+              {% endif %}
+            {% endif %}
+            by yourself and your prize will be determined based on your total score.</li>
+          <li><strong>Contest phase</strong>: you'll play the game
+            {% if game_number == 1 %}
+              once
+            {% else %}
+              {% if game_number == 2 %}
+                twice
+              {% else %}
+                {% if game_number >= 3 %}
+                  {{ game_number|apnumber }} times
+                {% endif %}
+              {% endif %}
+            {% endif %}
+            with randomly selected {{ player_number|pluralize }} other players. Among those who score above the winning score, the player with the highest score wins.</li>
+          <li><strong>Survey phase</strong>: you'll fill out a short survey.</li>
+        </ol>
+        <p>In the game, you have a knapsack, on the bottom, and there are a number of items available with different weights and values, on top of the page. Your knapsack has a limited weight capacity. So you can pick only a limited number of items.</p>
+        <p>You can add or remove items as many times as you like, by clicking on them. Your score is the total value of the items in your knapsack divided by the optimal value of the knapsack, which is displayed at all times under your knapsack container.</p>
+        <p>You'll have a limited amount of time to complete each game. When the time is over, you will automatically go to the next game. If you found your desired solution earlier, you can click the "Submit" button to continue.</p>
+        <p>Click the "Let's start..." button to start the training phase.</p>
+    </div>
+    <div class="row" style="margin-bottom:40px; margin-top:40px; ">
+      <div class="col-xs-5 ">
+      </div>
+      <div class="col-xs-2 ">
+        <a id="StartBtn" href="{% url 'knapsack:training' %}" class="btn btn-lg btn-success">Let's Start...</a>
+      </div>
+      <div class="col-xs-5 ">
+      </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+    });
+
+  </script>
+{% endblock %}

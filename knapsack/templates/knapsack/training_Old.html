@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Welcome to the Knapsack Contest!{% endblock %}
+
+{% block blockcontent %}
+  <h1 class="GameTitle">Knapsack</h1>
+
+  <div id="ItemsTitle">
+    Available items that you can click to put in your knapsack:
+  </div>
+  <div id="ItemsContainer">
+  </div>
+
+  <div id="KnapsackBag">
+      <img id="KnapsackBagImg" src="{% static 'knapsack/media/mochila_Orange.svg' %}" class="left-block" alt="Knapsack bag" width="100%">
+  </div>
+  <div id="KnapsackItemsContainer">
+  </div>
+  <div id="KnapsackItemsTitle">
+    <div class="row">
+      <div class="col-xs-4 ">
+        Items in your knapsack
+      </div>
+      <div class="col-xs-2 ">
+        Score: $<span id="KnapsackValue">0</span>
+      </div>
+      <div class="col-xs-3 ">
+        Weight: <span id="KnapsackWeight">0</span> Kg
+      </div>
+      <div class="col-xs-3 ">
+        Capacity: <span id="KnapsackCapacity">250</span> Kg
+      </div>
+    </div>
+  </div>
+
+  <div id="LeaderBoard" class="ribbon round blue">
+    <div class="LeaderBoardHeader">
+      <div style="font-size:19px;">Leaderboard</div>
+      <table class="table">
+        <tbody>
+          <tr>
+            <td class="col-xs-1">Player</td>
+            <td class="col-xs-1">Current Score</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="LeaderBoardContent">
+      <table class="table">
+        <tbody>
+          <tr>
+            <td class="col-xs-1">Player</td>
+            <td class="col-xs-1">Current Score</td>
+          </tr>
+          <tr>
+            <td class="col-xs-1">Player</td>
+            <td class="col-xs-1">Current Score</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="SubmitCountdown">
+    <p id="CountdownTitle">
+      Time left to the end of this game:
+    </p>
+    <div id="countdown" class="countdownHolder">
+    </div>
+    <div id="SubmitBtnContainer">
+      <a id="StartBtn" href="/pretest/1" class="btn btn-xlarge btn-success">Submit</a>
+    </div>
+  </div>
+
+
+{% endblock %}
+
+{% block scontent %}
+
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+      // Items setup.
+      var capacity = 1300;
+      $("#KnapsackCapacity").html(capacity);
+      var items = [{'value':201, 'weight':192, 'length':0}, 
+        {'value':84, 'weight':80, 'length':0}, 
+        {'value':113, 'weight':106, 'length':0}, 
+        {'value':303, 'weight':288, 'length':0}, 
+        {'value':227, 'weight':212, 'length':0}, 
+        {'value':251, 'weight':240, 'length':0}, 
+        {'value':129, 'weight':121, 'length':0}, 
+        {'value':147, 'weight':140, 'length':0}, 
+        {'value':86, 'weight':82, 'length':0}, 
+        {'value':127, 'weight':120, 'length':0}, 
+        {'value':144, 'weight':137, 'length':0}, 
+        {'value':167, 'weight':160, 'length':0}];
+
+      var availableItems = [];
+      var kanpsackItems = [];
+
+      var windowWidth = $( window ).width();
+      var windowHeight = $( window ).height();
+
+      var itemsContainerLeft = $( "#ItemsContainer" ).css("left");
+      var itemsContainerLeftPercent = parseFloat(itemsContainerLeft.substring(0, itemsContainerLeft.length - 2)) * 100 / windowWidth;
+      var itemsContainerTop = $( "#ItemsContainer" ).css("top");
+      var itemsContainerTopPercent = parseFloat(itemsContainerTop.substring(0, itemsContainerTop.length - 2)) * 100 / windowHeight;
+      var itemsContainerWidth = $( "#ItemsContainer" ).css("width");
+      var itemsContainerWidthPercent = parseFloat(itemsContainerWidth.substring(0, itemsContainerWidth.length - 2)) * 100 / windowWidth;
+
+      var totalWeight = 0;
+      for (i = 0; i < items.length; i++) { 
+          totalWeight += items[i]['weight'];
+      }
+      for (i = 0; i < items.length; i++) { 
+          items[i]['length'] = items[i]['weight'] * itemsContainerWidthPercent / totalWeight;
+      }
+      var kanpsackLength = capacity * itemsContainerWidthPercent / totalWeight;
+      $( "#KnapsackItemsContainer" ).css("width", kanpsackLength + "%");
+
+      var prviousItem = $( "#SubmitCountdown" );
+      var currentLeft = itemsContainerLeftPercent;
+      for (i = 0; i < items.length; i++) { 
+        var newSpan1 = jQuery('<span/>', {
+          class: 'Value',
+          text: "$" + items[i]['value'],
+        });
+        var newTd1 = jQuery('<td/>', {
+          class: 'ItemText',
+        });
+        newTd1.append(newSpan1);
+        var newTr1 = jQuery('<tr/>');
+        newTr1.append(newTd1);
+        var newSpan2 = jQuery('<span/>', {
+          class: 'Weight',
+          text: items[i]['weight'] + " Kg",
+        });
+        var newTd2 = jQuery('<td/>', {
+          class: 'ItemText',
+        });
+        newTd2.append(newSpan2);
+        var newTr2 = jQuery('<tr/>');
+        newTr2.append(newTd2);
+        var newTbody = jQuery('<tbody/>');
+        newTbody.append(newTr1);
+        newTbody.append(newTr2);
+        var Table = jQuery('<table/>', {
+          class: 'Table',
+        });
+        Table.append(newTbody);
+        var newItem = jQuery('<div/>', {
+          id: 'Item' + i,
+          class: 'Item',
+          style: "top:100px; height:16%; left:" + currentLeft + "%; width:" + items[i]['length'] + "%;"
+        });
+        newItem.append(Table);
+        prviousItem.after(newItem);
+        prviousItem = newItem;
+        currentLeft += items[i]['length'];
+        availableItems.push(i);
+      }
+
+      var moving = false;
+
+      var totalknapsackValue = 0;
+      var totalknapsackWeight = 0;
+      var totalknapsackLength = 0;
+
+      var totalAvailableValue = 0;
+      for (i = 0; i < items.length; i++) { 
+          totalAvailableValue += items[i]['value'];
+      }
+      var totalAvailableWeight = totalWeight;
+      var totalAvailableLength = itemsContainerWidthPercent;
+
+      var knapsackContainerLeft = $( "#KnapsackItemsContainer" ).css("left");
+      var knapsackContainerLeftPercent = parseFloat(knapsackContainerLeft.substring(0, knapsackContainerLeft.length - 2)) * 100 / windowWidth;
+      var knapsackContainerTop = $( "#KnapsackItemsContainer" ).css("top");
+      var knapsackContainerTopPercent = parseFloat(knapsackContainerTop.substring(0, knapsackContainerTop.length - 2)) * 100 / windowHeight;
+
+      $(".Item").click(function() {
+        var index = parseInt($(this).attr('id').substring(4, $(this).attr('id').length));
+        if (availableItems.indexOf(index) > -1 && !$("#Item" + index).hasClass( "disabled" ) && !moving) {
+          var itemFound = false;
+          for (i = 0; i < availableItems.length; i++) { 
+            if (itemFound) {
+              var iLeft = $("#Item" + availableItems[i]).css("left");
+              iLeft = parseFloat(iLeft.substring(0, iLeft.length - 2)) * 100 / windowWidth;
+              var indexWidth = $("#Item" + index).css("width");
+              indexWidth = parseFloat(indexWidth.substring(0, indexWidth.length - 2)) * 100 / windowWidth;
+              var newLeft = (iLeft - indexWidth) + "%";
+              moving = true;
+              $("#Item" + availableItems[i]).animate({ 
+                left: newLeft,
+              }, 1000, function() { moving = false; } );
+            }
+            else if (availableItems[i] == index) {
+              itemFound = true;
+              availableItems.splice(availableItems.indexOf(index), 1);
+              i--;
+            }
+          }
+          moving = true;
+          $(this).animate({ 
+            left: (knapsackContainerLeftPercent + totalknapsackLength) + "%",
+            top: knapsackContainerTopPercent + "%",
+          }, 1000, function() { moving = false; } );
+          kanpsackItems.push(index);
+          totalknapsackValue += items[index]['value'];
+          $("#KnapsackValue").html(totalknapsackValue);
+          totalknapsackWeight += items[index]['weight'];
+          $("#KnapsackWeight").html(totalknapsackWeight);
+          var indexWidth = $("#Item" + index).css("width");
+          totalknapsackLength += parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+          totalAvailableValue -= items[index]['value'];
+          totalAvailableWeight -= items[index]['weight'];
+          totalAvailableLength -= parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+          for (i = 0; i < availableItems.length; i++) {
+            if (items[availableItems[i]]['length'] + totalknapsackLength > kanpsackLength) {
+              $("#Item" + availableItems[i]).addClass("disabled");
+            }
+          }
+        }
+        if (kanpsackItems.indexOf(index) > -1 && !moving) {
+          var itemFound = false;
+          for (i = 0; i < kanpsackItems.length; i++) { 
+            if (itemFound) {
+              var iLeft = $("#Item" + kanpsackItems[i]).css("left");
+              iLeft = parseFloat(iLeft.substring(0, iLeft.length - 2)) * 100 / windowWidth;
+              var indexWidth = $("#Item" + index).css("width");
+              indexWidth = parseFloat(indexWidth.substring(0, indexWidth.length - 2)) * 100 / windowWidth;
+              var newLeft = (iLeft - indexWidth) + "%";
+              moving = true;
+              $("#Item" + kanpsackItems[i]).animate({ 
+                left: newLeft,
+              }, 1000, function() { moving = false; } );
+            }
+            else if (kanpsackItems[i] == index) {
+              itemFound = true;
+              kanpsackItems.splice(kanpsackItems.indexOf(index), 1);
+              i--;
+            }
+          }
+          moving = true;
+          $(this).animate({ 
+            left: (itemsContainerLeftPercent + totalAvailableLength) + "%",
+            top: itemsContainerTopPercent + "%",
+          }, 1000, function() { moving = false; } );
+          availableItems.push(index);
+          totalAvailableValue += items[index]['value'];
+          totalAvailableWeight += items[index]['weight'];
+          var indexWidth = $("#Item" + index).css("width");
+          totalAvailableLength += parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+          totalknapsackValue -= items[index]['value'];
+          $("#KnapsackValue").html(totalknapsackValue);
+          totalknapsackWeight -= items[index]['weight'];
+          $("#KnapsackWeight").html(totalknapsackWeight);
+          totalknapsackLength -= parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+          for (i = 0; i < availableItems.length; i++) {
+            if (items[availableItems[i]]['length'] + totalknapsackLength <= kanpsackLength) {
+              $("#Item" + availableItems[i]).removeClass("disabled");
+            }
+          }
+        }
+      });
+
+      // Game timer setup.
+
+      var ts = new Date(2012, 0, 1),
+        newYear = true;
+
+      if((new Date()) > ts){
+        // The new year is here! Count towards something else.
+        // Notice the *1000 at the end - time must be in milliseconds
+        ts = (new Date()).getTime() + 4*60*1000;
+        newYear = false;
+      }
+
+      $('#countdown').countdown({
+        timestamp : ts,
+      });
+
+    });
+
+    // Number of seconds in every time division
+    var days  = 24*60*60,
+      hours = 60*60,
+      minutes = 60,
+      timeIsUp = false;
+    
+    // Creating the plugin
+    $.fn.countdown = function(prop){
+      
+      var options = $.extend({
+        callback  : function(){},
+        timestamp : 0
+      },prop);
+      
+      var left, d, h, m, s, positions;
+
+      // Initialize the plugin
+      init(this, options);
+      
+      positions = this.find('.position');
+      
+      (function tick(){
+        
+        // Time left
+        left = Math.floor((options.timestamp - (new Date())) / 1000);
+        
+        if(left < 0){
+          left = 0;
+        }
+        
+        // Number of days left
+        d = Math.floor(left / days);
+        updateDuo(0, 1, d);
+        left -= d*days;
+        
+        // Number of hours left
+        h = Math.floor(left / hours);
+        updateDuo(2, 3, h);
+        left -= h*hours;
+        
+        // Number of minutes left
+        m = Math.floor(left / minutes);
+        updateDuo(4, 5, m);
+        left -= m*minutes;
+        
+        // Number of seconds left
+        s = left;
+        if (m == 0 && s == 0) {
+          timeIsUp = true;
+
+
+
+
+        }
+        else {
+          updateDuo(6, 7, s);
+          
+          // Calling an optional user supplied callback
+          options.callback(d, h, m, s);
+          
+          // Scheduling another call of this function in 1s
+          setTimeout(tick, 1000);
+        }
+      })();
+      
+      // This function updates two digit positions at once
+      function updateDuo(minor,major,value){
+        switchDigit(positions.eq(minor),Math.floor(value/10)%10);
+        switchDigit(positions.eq(major),value%10);
+      }
+      
+      return this;
+    };
+
+
+    function init(elem, options){
+      elem.addClass('countdownHolder');
+
+      // Creating the markup inside the container
+      $.each(['Days','Hours','Minutes','Seconds'],function(i){
+        $('<span class="count'+this+'">').html(
+          '<span class="position">\
+            <span class="digit static">0</span>\
+          </span>\
+          <span class="position">\
+            <span class="digit static">0</span>\
+          </span>'
+        ).appendTo(elem);
+        
+        if(this!="Seconds"){
+          elem.append('<span class="countDiv countDiv'+i+'"></span>');
+        }
+      });
+
+    }
+
+    // Creates an animated transition between the two numbers
+    function switchDigit(position,number){
+      
+      var digit = position.find('.digit')
+      
+      if(digit.is(':animated')){
+        return false;
+      }
+      
+      if(position.data('digit') == number){
+        // We are already showing this number
+        return false;
+      }
+      
+      position.data('digit', number);
+      
+      var replacement = $('<span>',{
+        'class':'digit',
+        css:{
+          top:'-2.1em',
+          opacity:0
+        },
+        html:number
+      });
+      
+      // The .static class is added when the animation
+      // completes. This makes it run smoother.
+      
+      digit
+        .before(replacement)
+        .removeClass('static')
+        .animate({top:'2.5em',opacity:0},'fast',function(){
+          digit.remove();
+        })
+
+      replacement
+        .delay(100)
+        .animate({top:0,opacity:1},'fast',function(){
+          replacement.addClass('static');
+        });
+    }
+  </script>
+{% endblock %}

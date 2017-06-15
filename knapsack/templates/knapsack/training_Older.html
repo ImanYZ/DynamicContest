@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Welcome to the Knapsack Contest!{% endblock %}
+
+{% block blockcontent %}
+  <div id="Item1">
+    <img src="{% static 'knapsack/media/Component-Cube04-Orange.png' %}" alt="Knapsack item" width="70px" height="70px" style="max-width:100px;">
+    <div class="ItemWeightValue">
+      <table style="width:100%">
+        <tr>
+          <td>10</td>
+          <td rowspan="2">$10</td>
+        </tr>
+        <tr>
+          <td>Kg</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div id="Item2">
+    <div style="-ms-transform: scale(1.5,1.5); -webkit-transform: scale(1.5,1.5); transform: scale(1.5,1.5);">
+      <img src="{% static 'knapsack/media/Component-Cube04-Orange.png' %}" alt="Knapsack item" width="70px" height="70px" style="max-width:100px;">
+      <div class="ItemWeightValue">
+        <table style="width:100%">
+          <tr>
+            <td>15</td>
+            <td rowspan="2">$15</td>
+          </tr>
+          <tr>
+            <td>Kg</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="Item3">
+    <div style="-ms-transform: scale(2,2); -webkit-transform: scale(2,2); transform: scale(2,2);">
+      <img src="{% static 'knapsack/media/Component-Cube04-Grayscale.png' %}" alt="Knapsack item taken" width="70px" height="70px" style="max-width:100px;">
+      <div class="ItemWeightValue">
+        <table style="width:100%">
+          <tr>
+            <td>20</td>
+            <td rowspan="2">$20</td>
+          </tr>
+          <tr>
+            <td>Kg</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="Item4">
+    <div style="-ms-transform: scale(2.5,2.5); -webkit-transform: scale(2.5,2.5); transform: scale(2.5,2.5);">
+      <img src="{% static 'knapsack/media/Component-Cube04-Grayscale.png' %}" alt="Knapsack item taken" width="70px" height="70px" style="max-width:100px;">
+      <div class="ItemWeightValue">
+        <table style="width:100%">
+          <tr>
+            <td>25</td>
+            <td rowspan="2">$25</td>
+          </tr>
+          <tr>
+            <td>Kg</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="Item5">
+    <div style="-ms-transform: scale(2.5,2.5); -webkit-transform: scale(2.5,2.5); transform: scale(2.5,2.5);">
+      <img src="{% static 'knapsack/media/Component-Cube04-Orange.png' %}" alt="Knapsack item" width="70px" height="70px" style="max-width:100px;">
+      <div class="ItemWeightValue">
+        <table style="width:100%">
+          <tr>
+            <td>25</td>
+            <td rowspan="2">$25</td>
+          </tr>
+          <tr>
+            <td>Kg</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="Item6">
+    <div style="-ms-transform: scale(2,2); -webkit-transform: scale(2,2); transform: scale(2,2);">
+      <img src="{% static 'knapsack/media/Component-Cube04-Orange.png' %}" alt="Knapsack item taken" width="70px" height="70px" style="max-width:100px;">
+      <div class="ItemWeightValue">
+        <table style="width:100%">
+          <tr>
+            <td>20</td>
+            <td rowspan="2">$20</td>
+          </tr>
+          <tr>
+            <td>Kg</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="Item7">
+    <div style="-ms-transform: scale(1.5,1.5); -webkit-transform: scale(1.5,1.5); transform: scale(1.5,1.5);">
+      <img src="{% static 'knapsack/media/Component-Cube04-Orange.png' %}" alt="Knapsack item" width="70px" height="70px" style="max-width:100px;">
+      <div class="ItemWeightValue">
+        <table style="width:100%">
+          <tr>
+            <td>15</td>
+            <td rowspan="2">$15</td>
+          </tr>
+          <tr>
+            <td>Kg</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="Item8">
+    <img src="{% static 'knapsack/media/Component-Cube04-Orange.png' %}" alt="Knapsack item" width="70px" height="70px" style="max-width:100px;">
+    <div class="ItemWeightValue">
+      <table style="width:100%">
+        <tr>
+          <td>10</td>
+          <td rowspan="2">$10</td>
+        </tr>
+        <tr>
+          <td>Kg</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="KnapsackBag">
+      <img src="{% static 'knapsack/media/mochila_Orange.svg' %}" class="img-responsive center-block" alt="Knapsack bag" width="250px" height="250px" style="max-width:250px;">
+  </div>
+
+<!--   <div id="LeaderBoard">
+    <div class="infobox-container"> 
+     
+    <div class="triangle-l"></div> 
+    <div class="triangle-r"></div> 
+     
+    <div class="infobox"> 
+    <h3><span>This is the Header</span></h3> 
+    <p>This is the content of the infobox.<p/>  
+    </div> 
+     
+    </div>
+  </div>
+ -->
+  <div class="row" id="SubmitBtnContainer">
+    <div class="col-xs-8 ">
+    </div>
+    <div class="col-xs-4 ">
+      <a id="StartBtn" href="/pretest/1" class="btn btn-lg btn-success">Submit</a>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+  </script>
+{% endblock %}

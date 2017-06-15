@@ -1,0 +1,155 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  padding-top: 52px;
+  padding-bottom: 52px;
+  background-color: white;
+  background-position: center center;
+  background-repeat: no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+.navbar-inverse {
+  background-color: #0E284B;
+  background-image: none;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
+
+.container-fluid, .theme-showcase, .transBackground {
+  height: 100%;
+}
+
+.navbar-fixed-bottom p {
+  color: white;
+  margin-bottom: 0px;
+  margin-right: 40px;
+  margin-left: 40px;
+  margin-top: 13px;
+}
+
+.WelcomeTitle {
+  font-size: 70px;
+  color:#FF7B39;
+  font-family: 'Damion', cursive;
+  margin-bottom: 25px;
+}
+
+p, li {
+  font-family: 'Raleway', sans-serif;
+  font-size: 16px;
+}
+
+.ItemWeightValue {
+  color:white;
+  margin-bottom:0px;
+  margin-top:-49.9px;
+  margin-left:7px;
+  width:100%
+}
+
+#Item1 {
+  position:absolute;
+  left:19px;
+  top:70px;
+}
+
+#Item2 {
+  position:absolute;
+  left:109px;
+  top:70px;
+}
+
+#Item3 {
+  position:absolute;
+  left:229px;
+  top:70px;
+}
+
+#Item4 {
+  position:absolute;
+  left:379px;
+  top:70px;
+}
+
+#Item5 {
+  position:absolute;
+  left:559px;
+  top:70px;
+}
+
+#Item6 {
+  position:absolute;
+  left:709px;
+  top:70px;
+}
+
+#Item7 {
+  position:absolute;
+  left:829px;
+  top:70px;
+}
+
+#Item8 {
+  position:absolute;
+  left:919px;
+  top:70px;
+}
+
+#KnapsackBag {
+  margin-top:220px;
+}
+
+#SubmitBtnContainer {
+  margin-bottom:130px;
+  margin-top:-130px;
+}
+
+#LeaderBoard {
+  position:absolute;
+  left:919px;
+  top:70px;
+}
+
+.infobox-container {
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+.infobox {
+    width: 250px;
+    background: #424242;
+    padding: 10px 5px 5px 5px;
+    margin:10px;
+    color: #fff;
+    font-size: 90%;
+}
+.infobox h3 {
+    background: #3198dd;
+    width: 270px;
+    color: #fff;
+    padding: 10px 5px;
+    margin: 0;
+    font-size: 160%;
+    text-align: center;
+    font-weight: bold;
+}

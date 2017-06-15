@@ -1,0 +1,1225 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack {% if gameNum %}Contest{% else %}Training{% endif %}!{% endblock %}
+
+{% block headertitle %}{% if gameNum %}Contest {{contestIndex}} out of {{totalContestsNum}}, Game {{ gameNum }} out of {{ totalGameNum }}{% else %}{% if trainingNum %}{% if contestMode %}Quit Training Game {{ quitTrainingNum }}{% else %}Training Game {{ trainingNum }} out of {{ totalTrainingNum }}{% endif %}{% endif %}{% endif %}{% endblock %}
+
+{% block blockcontent %}
+  <div id="ItemsTitle">
+    Available items that you can click to put in your knapsack:
+  </div>
+  <div id="ItemsContainer">
+  </div>
+
+<!--   <div id="KnapsackBag">
+      <img id="KnapsackBagImg" src="{% static 'knapsack/media/mochila_Orange.svg' %}" class="left-block" alt="Knapsack bag" width="100%">
+  </div>
+ -->
+  <div id="HintsExplanation">
+    Hover your mouse on items and the right-hand side information to see extra information.
+  </div>
+  <div id="KnapsackItemsTitle">
+    Items in your knapsack:
+  </div>
+  <div id="KnapsackItemsContainer">
+  </div>
+  <div id="KnapsackItemsStats">
+<!--     <p>Your score: $<span id="Score">0</span></p> -->
+    <div style="color:#FFC178; font-weight:bold;">
+      <p id="KnapsackValueHint">Try to maximize</p>
+      <p title="Try to maximize the current total value of items in your knapsack.">Current value: $<span id="KnapsackValue">0</span></p>
+      <p title="You'll win if the total value of items in your knapsack reaches this amount.">Target Value: $<span id="WinningValue">0</span></p>
+    </div>
+    <p title="Shows the weight capacity of your knapsack.">Maximum weight: <span id="KnapsackCapacity">0</span> Kg</p>
+    <p title="Shows the current total weight of items in your knapsack.">Current weight: <span id="KnapsackWeight">0</span> Kg</p>
+    <p title="Shows how much weight you have left in your knapsack.">Weight left: <span id="KnapsackWeightLeft">0</span> Kg</p>
+<!--
+    <p id="CountdownTitle">
+      Time left:
+    </p>
+    <div id="countdown" class="countdownHolder" title="Time left to the end of this game.">
+    </div>
+-->
+  {% if gameNum %}
+    <div id="QuitBtnContainer" title="Whenever you want, you can quit the contest to play an easier training game, but instead of the contest prize, you will earn a much smaller amount if your knapsack value reaches the wining value.">
+      <a id="QuitBtn" href="{% url 'knapsack:training' %}?userGameId={{ userGameId }}" class="btn btn-xlarge btn-danger">Quit</a>
+    </div>
+  {% else %}
+    <div id="SubmitBtnContainer" title="Whenever you are confident with the items in your knapsack, click the submit button to submit your choices.">
+      <a id="StartBtn" href="{% url 'knapsack:results' %}?userTrainingId={{ userTrainingId }}{% if contestMode %}&userGameId={{ userGameId }}{% endif %}" class="btn btn-xlarge btn-success">Skip</a>
+    </div>
+  {% endif %}
+  </div>
+
+  {% if gameNum %}
+    {% if intermediate_information == True %}
+      {% if minutes_to_reveal or seconds_to_reveal %}
+        <div id="IntermediateInformationMessage">
+          You will learn about how your opponent is doing only after <span id="MinutesToReveal">{{ minutes_to_reveal }}</span>:<span id="SecondsToReveal">{{ seconds_to_reveal }}</span>.
+        </div>
+      {% endif %}
+    {% endif %}
+    {% if intermediate_information == True or complete_information == True %}
+<!--      <div id="LeaderBoard" class="ribbon round blue" {% if intermediate_information == True and gameNum == 1 %}style="display:none;"{% endif %}>
+        <div class="LeaderBoardHeader">
+          <div style="font-size:19px;">Current Status Board</div>
+          <table class="table">
+            <tbody>
+              <tr>
+                <td id="LeaderboardHeaderPlayer" class="col-xs-1">Player</td>
+                {% for totalGameIndex in totalGameIndices %}
+                  <td id="LeaderboardHeaderGame{{ totalGameIndex }}" class="col-xs-1">Game {{ forloop.counter }} Value</td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+         <div class="LeaderBoardContent">
+          <table class="table">
+            <tbody>
+              <tr>
+                <td class="col-xs-1">You</td>
+                {% for totalGameIndex in totalGameIndices %}
+                  <td id="UserScore{{ totalGameIndex }}" class="col-xs-1">$0</td>
+                {% endfor %}
+              </tr>
+            {% if opponentsScores|length == 1 %}
+              <tr>
+                <td class="col-xs-1">Your opponent</td>
+                {% for totalGameIndex in totalGameIndices %}
+                  <td id="Opponent0Game{{ totalGameIndex }}Score" class="col-xs-1">$0</td>
+                {% endfor %}
+              </tr>
+            {% else %}
+              {% for opponentScores in opponentsScores %}
+                <tr>
+                  <td class="col-xs-1">Opponent {{ forloop.counter }}</td>
+                  {% for totalGameIndex in totalGameIndices %}
+                    <td id="Opponent{{ forloop.parentloop.counter0 }}Game{{ totalGameIndex }}Score" class="col-xs-1">$0</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div> -->
+    {% endif %}
+  {% endif %}
+
+  <div id="SubmitCountdown">
+  </div>
+
+  <div class="modal"><!-- Place at bottom of page --></div>
+
+  <div id="GameOverModal">
+    <!-- Modal content -->
+    <div id="GameOverModalContent" class="alert alert-success text-center" role="alert">
+      <h1>Quick question for ${{ quit_question_earning }}...</h1>
+      <div id="QuitQuestion" style="display: none;">
+        <form id="QuitQuestionForm" action="{% url 'knapsack:training' %}" method="post">
+            <textarea class="form-control input-lg" rows="5" id="WhyQuit" name="WhyQuit" placeholder="Please explain here why you quit..."></textarea><br>
+            <input type="hidden" id="HiddenUserGameID" name="HiddenUserGameID" value="{{ userGameId }}">
+            <h3>Do you think this game was feasible? If your guess is correct, you will earn an extra ${{ quit_question_earning }}.</h3>
+            <div id="WasFeasibleYesDIV" class="radio lb-lg label label-info">
+              <label><input type="radio" id="WasFeasibleYes" name="WasFeasible" value="Yes"></label>
+              Yes
+            </div>
+            <br><br>
+            <div id="WasFeasibleNoDIV" class="radio lb-lg label label-info">
+              <label><input type="radio" id="WasFeasibleNo" name="WasFeasible" value="No"></label>
+              No
+            </div>
+            <br><br>
+            <div id="WasFeasibleNotSureDIV" class="radio lb-lg label label-info">
+              <label><input type="radio" id="WasFeasibleNotSure" name="WasFeasible" value="NotSure"></label>
+              I am not sure.
+            </div>
+            <br><br>
+            <a id="WasFeasibleContinue" href="{% url 'knapsack:training' %}?userGameId={{ userGameId }}" class="btn btn-lg btn-success" style="display:none;">Continue to the quit game...</a>
+            <input id="WasFeasibleSubmit" type="submit" class="btn btn-success btn-lg" value="Submit">
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+
+  <!-- JavaScript code for this project -->
+  <script>
+    window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//again because google chrome don't insert first hash into history
+    window.onhashchange=function(){window.location.hash="no-back-button";}
+
+    $.fn.textWidth = function(){
+      var html_org = $(this).html();
+      var html_calc = '<span>' + html_org + '</span>';
+      $(this).html(html_calc);
+      var width = $(this).find('span:first').width();
+      $(this).html(html_org);
+      return width;
+    };
+
+    var modalObj;
+
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+
+    {% if not contestMode or contestMode == 0 %}
+      var remaining_minutes = {{ max_minutes }};
+      var remaining_seconds = {{ max_seconds }};
+      var remaining_total_seconds = remaining_minutes * 60 + remaining_seconds;
+      var trainingInterval = setInterval(function myTimer() {
+          if (remaining_total_seconds <= 0) {
+            $("#StartBtn")[0].click();
+          }
+          remaining_total_seconds -= 1;
+      }, 1000);
+    {% endif %}
+
+      function adaptFontSizes() {
+        var windowWidth = $( window ).width();
+        var windowHeight = $( window ).height();
+
+        $( "#ItemsTitle" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( "#HintsExplanation" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackItemsTitle" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( "#IntermediateInformationMessage" ).css("font-size", (windowHeight / 4.9) + "%");
+        // $( "#Score" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackValueHint" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackValue" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#WinningValue" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackWeight" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackWeightLeft" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#KnapsackCapacity" ).parent().css("font-size", (windowHeight / 4.9) + "%");
+        $( "#CountdownTitle" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( ".btn-xlarge" ).css("font-size", (windowHeight / 4.9) + "%");
+        $( ".btn-xlarge" ).css("padding", (windowHeight / 160) + "% " + (windowHeight / 130) + "%");
+        $( ".countdownHolder" ).css("font-size", (windowHeight / 4) + "%");
+        $( ".Value" ).css("font-size", (windowHeight / 9.1) + "%");
+        $( ".Weight" ).css("font-size", (windowHeight / 9.1) + "%");
+
+        return [windowWidth, windowHeight];
+      }
+
+      function AdaptAvailableItemsText(availableItems, windowHeight) {
+        for (i = 0; i < availableItems.length; i++) {
+          ItemWidth = $( "#Item" + availableItems[i] ).css("width");
+          ItemWidth = parseFloat(ItemWidth.substring(0, ItemWidth.length - 2));
+          $("#Item" + availableItems[i]).find(".Value").css("font-size", (windowHeight / 9.1) + "%");
+          $("#Item" + availableItems[i]).find(".Weight").css("font-size", (windowHeight / 9.1) + "%");
+          if (ItemWidth < $("#Item" + availableItems[i]).find(".Value").textWidth()) {
+            // $("#Item" + availableItems[i]).find(".Value").css("top", "100%");
+            // $("#Item" + availableItems[i]).find(".Weight").css("top", "121%");
+            var decreasingRate = 0.01;
+            var decreasingCoefficient = 1;
+            while (ItemWidth <= $("#Item" + availableItems[i]).find(".Value").textWidth()) {
+              $("#Item" + availableItems[i]).find(".Value").css("font-size", (windowHeight / (9.1 + decreasingCoefficient*decreasingRate)) + "%");
+              $("#Item" + availableItems[i]).find(".Weight").css("font-size", (windowHeight / (9.1 + decreasingCoefficient*decreasingRate)) + "%");
+              decreasingCoefficient += 2.5;
+            }
+            // if (!$("#Item" + availableItems[i]).hasClass("disabled")) {
+            //   $("#Item" + availableItems[i]).css("color", "#000000");
+            //   $("#Item" + availableItems[i]).css("text-shadow", "0 0 0");
+            // }
+            // else {
+            //   $("#Item" + availableItems[i]).css("color", "#777777");
+            //   $("#Item" + availableItems[i]).css("text-shadow", "0 0 0");
+            // }
+          }
+        }
+      }
+
+      // Items setup.
+      var capacity = {{ capacity }};
+      $("#KnapsackCapacity").html(capacity);
+      var winning_score = {{ winning_score }};
+      $("#WinningValue").html(winning_score);
+      $("#KnapsackWeightLeft").html(capacity);
+      var items = [{'value':{{ value_0 }}, 'weight':{{ weight_0 }}, 'inBag':{{ inBag_0|yesno:"true,false" }}, 'length':0}];
+      {% if value_1 != 0 or weight_1 != 0 %}
+        items.push({'value':{{ value_1 }}, 'weight':{{ weight_1 }}, 'inBag':{{ inBag_1|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_2 != 0 or weight_2 != 0 %}
+        items.push({'value':{{ value_2 }}, 'weight':{{ weight_2 }}, 'inBag':{{ inBag_2|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_3 != 0 or weight_3 != 0 %}
+        items.push({'value':{{ value_3 }}, 'weight':{{ weight_3 }}, 'inBag':{{ inBag_3|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_4 != 0 or weight_4 != 0 %}
+        items.push({'value':{{ value_4 }}, 'weight':{{ weight_4 }}, 'inBag':{{ inBag_4|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_5 != 0 or weight_5 != 0 %}
+        items.push({'value':{{ value_5 }}, 'weight':{{ weight_5 }}, 'inBag':{{ inBag_5|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_6 != 0 or weight_6 != 0 %}
+        items.push({'value':{{ value_6 }}, 'weight':{{ weight_6 }}, 'inBag':{{ inBag_6|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_7 != 0 or weight_7 != 0 %}
+        items.push({'value':{{ value_7 }}, 'weight':{{ weight_7 }}, 'inBag':{{ inBag_7|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_8 != 0 or weight_8 != 0 %}
+        items.push({'value':{{ value_8 }}, 'weight':{{ weight_8 }}, 'inBag':{{ inBag_8|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_9 != 0 or weight_9 != 0 %}
+        items.push({'value':{{ value_9 }}, 'weight':{{ weight_9 }}, 'inBag':{{ inBag_9|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_10 != 0 or weight_10 != 0 %}
+        items.push({'value':{{ value_10 }}, 'weight':{{ weight_10 }}, 'inBag':{{ inBag_10|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+      {% if value_11 != 0 or weight_11 != 0 %}
+        items.push({'value':{{ value_11 }}, 'weight':{{ weight_11 }}, 'inBag':{{ inBag_11|yesno:"true,false" }}, 'length':0});
+      {% endif %}
+
+      var availableItems = [];
+      var kanpsackItems = [];
+
+      modalObj = modalObj || (function () {
+          var pleaseWaitDiv = $('<div class="modal fade" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h1>The game is being loaded!</h1></div><div class="modal-body"><div class="progress progress-striped active"><div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%"><span class="sr-only">100% Complete</span></div></div></div></div></div></div></div>');
+          return {
+              showPleaseWait: function() {
+                  pleaseWaitDiv.modal();
+              },
+              hidePleaseWait: function () {
+                  pleaseWaitDiv.modal('hide');
+              },
+
+          };
+      })();
+
+      modalObj.showPleaseWait();
+
+      setTimeout( function() {
+        var windowSizes = adaptFontSizes();
+        var windowWidth = windowSizes[0];
+        var windowHeight = windowSizes[1];
+
+        var itemsContainerLeft = $( "#ItemsContainer" ).css("left");
+        var itemsContainerLeftPercent = parseFloat(itemsContainerLeft.substring(0, itemsContainerLeft.length - 2)) * 100 / windowWidth;
+        var ItemsTitleTop = $( "#ItemsTitle" ).css("top");
+        var ItemsTitleTopPercent = parseFloat(ItemsTitleTop.substring(0, ItemsTitleTop.length - 2)) * 100 / windowHeight;
+        var ItemsTitleHeight = $( "#ItemsTitle" ).css("height");
+        var ItemsTitleHeightPercent = parseFloat(ItemsTitleHeight.substring(0, ItemsTitleHeight.length - 2)) * 100 / windowHeight;
+        var itemsContainerTopPercent = ItemsTitleTopPercent + ItemsTitleHeightPercent;
+        $( "#ItemsContainer" ).css("top", itemsContainerTopPercent + "%");
+        var itemsContainerWidth = $( "#ItemsContainer" ).css("width");
+        var itemsContainerWidthPercent = parseFloat(itemsContainerWidth.substring(0, itemsContainerWidth.length - 2)) * 100 / windowWidth;
+
+        var totalWeight = 0;
+        for (i = 0; i < items.length; i++) { 
+            totalWeight += items[i]['weight'];
+        }
+        for (i = 0; i < items.length; i++) { 
+            items[i]['length'] = items[i]['weight'] * itemsContainerWidthPercent / totalWeight;
+        }
+        var kanpsackLength = capacity * itemsContainerWidthPercent / totalWeight;
+        $( "#KnapsackItemsContainer" ).css("width", kanpsackLength + "%");
+
+        var prviousItem = $( "#SubmitCountdown" );
+        var currentLeft = itemsContainerLeftPercent;
+        for (i = 0; i < items.length; i++) { 
+          var newSpan1 = jQuery('<div/>', {
+            class: 'Value',
+            text: "$" + items[i]['value'],
+          });
+          var newSpan2 = jQuery('<div/>', {
+            class: 'Weight',
+            text: items[i]['weight'] + " Kg",
+          });
+          var Table = jQuery('<div/>', {
+            class: 'Table',
+          });
+          Table.append(newSpan1);
+          Table.append(newSpan2);
+          var newItem = jQuery('<div/>', {
+            id: 'Item' + i,
+            title: "$" + items[i]['value'] + '<br>'
+              + items[i]['weight'] + " Kg" + '<br>'
+              + 'Click this item to move it into your knapsack.',
+            class: 'Item',
+            style: "top:" + itemsContainerTopPercent + "%; height:16%; left:" + currentLeft + "%; width:" + items[i]['length'] + "%;"
+          });
+          newItem.tooltip({placement: 'bottom',
+            html: true,
+          });
+          newItem.append(Table);
+          prviousItem.after(newItem);
+          prviousItem = newItem;
+          currentLeft += items[i]['length'];
+          availableItems.push(i);
+        }
+
+        for (i = 0; i < availableItems.length; i++) {
+          $("#Item" + availableItems[i]).css("top", itemsContainerTopPercent + "%");
+        }
+
+        AdaptAvailableItemsText(availableItems, windowHeight);
+        AdaptAvailableItemsText(kanpsackItems, windowHeight);
+
+        var moving = { flag: false };
+
+        var totalknapsackValue = 0;
+        var totalknapsackWeight = 0;
+        var totalknapsackLength = 0;
+
+        var totalAvailableValue = 0;
+        for (i = 0; i < items.length; i++) { 
+            totalAvailableValue += items[i]['value'];
+        }
+        var totalAvailableWeight = totalWeight;
+        var totalAvailableLength = itemsContainerWidthPercent;
+
+        var knapsackContainerLeft = $( "#KnapsackItemsContainer" ).css("left");
+        var knapsackContainerLeftPercent = parseFloat(knapsackContainerLeft.substring(0, knapsackContainerLeft.length - 2)) * 100 / windowWidth;
+        var knapsackContainerTop = $( "#KnapsackItemsContainer" ).css("top");
+        var knapsackContainerTopPercent = parseFloat(knapsackContainerTop.substring(0, knapsackContainerTop.length - 2)) * 100 / windowHeight;
+
+        for (index = 0; index < items.length; index++) { 
+          if (items[index]['inBag']) {
+            var itemFound = false;
+            for (i = 0; i < availableItems.length; i++) { 
+              if (itemFound) {
+                var iLeft = $("#Item" + availableItems[i]).css("left");
+                iLeft = parseFloat(iLeft.substring(0, iLeft.length - 2)) * 100 / windowWidth;
+                var indexWidth = $("#Item" + index).css("width");
+                indexWidth = parseFloat(indexWidth.substring(0, indexWidth.length - 2)) * 100 / windowWidth;
+                var newLeft = (iLeft - indexWidth) + "%";
+                $("#Item" + availableItems[i]).css('left', newLeft);
+              }
+              else if (availableItems[i] == index) {
+                itemFound = true;
+                availableItems.splice(availableItems.indexOf(index), 1);
+                i--;
+              }
+            }
+            $("#Item" + index).css('left', (knapsackContainerLeftPercent + totalknapsackLength) + "%");
+            $("#Item" + index).css('top', knapsackContainerTopPercent + "%");
+            kanpsackItems.push(index);
+            totalknapsackValue += items[index]['value'];
+            // if (totalknapsackValue >= {{ winning_score }}) {
+            //   $("#KnapsackValue").css('color', 'green');
+            // }
+            // else {
+            //   $("#KnapsackValue").css('color', 'red');
+            // }
+            $("#KnapsackValue").html(totalknapsackValue);
+            // $("#Score").html(Math.round(totalknapsackValue / {{ optimal_score }} * 100) / 100);
+            totalknapsackWeight += items[index]['weight'];
+            $("#KnapsackWeight").html(totalknapsackWeight);
+            $("#KnapsackWeightLeft").html(capacity - totalknapsackWeight);
+            var indexWidth = $("#Item" + index).css("width");
+            totalknapsackLength += parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+            totalAvailableValue -= items[index]['value'];
+            totalAvailableWeight -= items[index]['weight'];
+            totalAvailableLength -= parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+            for (i = 0; i < availableItems.length; i++) {
+              if (items[availableItems[i]]['weight'] + totalknapsackWeight > capacity) {
+                $("#Item" + availableItems[i]).addClass("disabled");
+                $("#Item" + availableItems[i]).attr( "data-original-title", "$" + items[availableItems[i]]['value'] + '<br>'
+                    + items[availableItems[i]]['weight'] + " Kg" + '<br>'
+                    + 'Your knapsack is almost full. You cannot put this item into it.' );
+              }
+            }
+          }
+        }
+        AdaptAvailableItemsText(availableItems, windowHeight);
+        AdaptAvailableItemsText(kanpsackItems, windowHeight);
+
+        $( "#KnapsackValue" ).parent().parent().tooltip({placement: 'left', html: true });
+        $( "#WinningValue" ).parent().tooltip({placement: 'left', html: true });
+        $( "#KnapsackWeight" ).parent().tooltip({placement: 'left', html: true });
+        $( "#KnapsackWeightLeft" ).parent().tooltip({placement: 'left', html: true });
+        $( "#KnapsackCapacity" ).parent().tooltip({placement: 'left', html: true });
+        $( "#countdown" ).tooltip({placement: 'left', html: true });
+        $( "#SubmitBtnContainer" ).tooltip({placement: 'left', html: true });
+        $( "#QuitBtnContainer" ).tooltip({placement: 'left', html: true });
+
+        {% if trainingNum == 1 %}
+        // $( "#Item0" ).tooltip('show');
+        // setTimeout( function() {
+        //   $( "#Item0" ).tooltip('hide');
+        //   $( "#KnapsackValue" ).parent().parent().tooltip('show');
+        //   setTimeout( function() {
+        //     $( "#KnapsackValue" ).parent().parent().tooltip('hide');
+        //     $( "#KnapsackWeight" ).parent().tooltip('show');
+        //     setTimeout( function() {
+        //       $( "#KnapsackWeight" ).parent().tooltip('hide');
+        //       $( "#KnapsackWeightLeft" ).parent().tooltip('show');
+        //       setTimeout( function() {
+        //         $( "#KnapsackWeightLeft" ).parent().tooltip('hide');
+        //         $( "#KnapsackCapacity" ).parent().tooltip('show');
+        //         setTimeout( function() {
+        //           $( "#KnapsackCapacity" ).parent().tooltip('hide');
+        //           $( "#countdown" ).tooltip('show');
+        //           setTimeout( function() {
+        //             $( "#countdown" ).tooltip('hide');
+        //             $( "#SubmitBtnContainer" ).tooltip('show');
+        //             setTimeout( function() {
+        //               $( "#SubmitBtnContainer" ).tooltip('hide');
+        //               }, 4000);
+        //             }, 4000);
+        //           }, 4000);
+        //         }, 4000);
+        //       }, 4000);
+        //     }, 4000);
+        //   }, 4000);
+        {% endif %}
+
+{% if gameNum %}
+        var notifiedOpponentWonFirst = false;
+        var notifiedOpponentQuitFirst = false;
+        var notifiedIntermediateInformation = false;
+
+        function checkGameStatus( data, moving, minutes, seconds ) {
+          if (data.opponentWonLastGame == 1) {
+            $("#GameOverModalContent").removeClass("alert-success");
+            $("#GameOverModalContent").addClass("alert-danger");
+            $("#GameOverModalContent").children("h1").html("Your opponent won the contest!");
+            var gameOverModal = $('#GameOverModal');
+            gameOverModal.css("display", "block");
+            var QuitQuestionDIV = $('#QuitQuestion');
+            QuitQuestionDIV.css("display", "none");
+            setTimeout(function() {
+              window.location.href = "{% url 'knapsack:game' %}";
+            }, 2000);
+          }
+          else if (data.youWonLastGame == 1 ) {
+            $("#GameOverModalContent").removeClass("alert-danger");
+            $("#GameOverModalContent").addClass("alert-success");
+            $("#GameOverModalContent").children("h1").html("Congratulations! You won the contest!");
+            var gameOverModal = $('#GameOverModal');
+            gameOverModal.css("display", "block");
+            var QuitQuestionDIV = $('#QuitQuestion');
+            QuitQuestionDIV.css("display", "none");
+            setTimeout(function() {
+              window.location.href = "{% url 'knapsack:game' %}";
+            }, 2000);
+          }
+          else if (data.youWon == 1) {
+            $("#GameOverModalContent").removeClass("alert-danger");
+            $("#GameOverModalContent").addClass("alert-success");
+            $("#GameOverModalContent").children("h1").html("You won the game! In order to win the contest, you should win all its games. The next game will start shortly.");
+            var gameOverModal = $('#GameOverModal');
+            gameOverModal.css("display", "block");
+            var QuitQuestionDIV = $('#QuitQuestion');
+            QuitQuestionDIV.css("display", "none");
+            setTimeout(function() {
+              window.location.href = "{% url 'knapsack:game' %}";
+            }, 3000);
+          }
+          else {
+  {% if intermediate_information == True %}
+      {% if minutes_to_reveal or seconds_to_reveal %}
+            if (seconds == 1 && minutes == 0 && !notifiedIntermediateInformation) {
+              notifiedIntermediateInformation = true;
+              // $("#LeaderBoard").show();
+              if (data.opponentQuitFirstGame == 1) {
+                $("#IntermediateInformationMessage").hide();
+                $("#GameOverModalContent").removeClass("alert-danger");
+                $("#GameOverModalContent").addClass("alert-success");
+                $("#GameOverModalContent").children("h1").html("Your opponent has quit the contest!");
+                var gameOverModal = $('#GameOverModal');
+                gameOverModal.css("display", "block");
+                var QuitQuestionDIV = $('#QuitQuestion');
+                QuitQuestionDIV.css("display", "none");
+                setTimeout(function() {
+                  moving.flag = false;
+                  $("#GameOverModalContent").removeClass("alert-success");
+                  gameOverModal.css("display", "none");
+                }, 3000);
+              }
+              else if (data.opponentWonFirstGame == 1) {
+                $("#IntermediateInformationMessage").hide();
+                $("#GameOverModalContent").removeClass("alert-success");
+                $("#GameOverModalContent").addClass("alert-danger");
+                $("#GameOverModalContent").children("h1").html("Your opponent has passed the first game!");
+                var gameOverModal = $('#GameOverModal');
+                gameOverModal.css("display", "block");
+                var QuitQuestionDIV = $('#QuitQuestion');
+                QuitQuestionDIV.css("display", "none");
+                setTimeout(function() {
+                  moving.flag = false;
+                  $("#GameOverModalContent").removeClass("alert-danger");
+                  gameOverModal.css("display", "none");
+                }, 3000);
+              }
+              else {
+                $("#IntermediateInformationMessage").hide();
+                $("#GameOverModalContent").removeClass("alert-success");
+                $("#GameOverModalContent").addClass("alert-warning");
+                $("#GameOverModalContent").children("h1").html("Your opponent has NOT passed the first game yet!");
+                var gameOverModal = $('#GameOverModal');
+                gameOverModal.css("display", "block");
+                var QuitQuestionDIV = $('#QuitQuestion');
+                QuitQuestionDIV.css("display", "none");
+                setTimeout(function() {
+                  moving.flag = false;
+                  $("#GameOverModalContent").removeClass("alert-warning");
+                  gameOverModal.css("display", "none");
+                }, 3000);
+              }
+            }
+            // else {
+            //   moving.flag = false;
+            // }
+      {% endif %}
+  {% else %}
+    {% if complete_information == True %}
+            if (data.opponentJustQuitFirstGame == 1 && !notifiedOpponentQuitFirst) {
+              notifiedOpponentQuitFirst = true;
+              $("#GameOverModalContent").removeClass("alert-danger");
+              $("#GameOverModalContent").addClass("alert-success");
+              $("#GameOverModalContent").children("h1").html("Your opponent just quit the contest!");
+              var gameOverModal = $('#GameOverModal');
+              gameOverModal.css("display", "block");
+              var QuitQuestionDIV = $('#QuitQuestion');
+              QuitQuestionDIV.css("display", "none");
+              setTimeout(function() {
+                // moving.flag = false;
+                $("#GameOverModalContent").removeClass("alert-success");
+                gameOverModal.css("display", "none");
+              }, 4000);
+            }
+            else if (data.opponentJustWonFirstGame == 1 && !notifiedOpponentWonFirst) {
+              notifiedOpponentWonFirst = true;
+              $("#GameOverModalContent").removeClass("alert-success");
+              $("#GameOverModalContent").addClass("alert-danger");
+              $("#GameOverModalContent").children("h1").html("Your opponent just won the first game!");
+              var gameOverModal = $('#GameOverModal');
+              gameOverModal.css("display", "block");
+              var QuitQuestionDIV = $('#QuitQuestion');
+              QuitQuestionDIV.css("display", "none");
+              setTimeout(function() {
+                // moving.flag = false;
+                $("#GameOverModalContent").removeClass("alert-danger");
+                gameOverModal.css("display", "none");
+              }, 4000);
+            }
+            // else {
+            //   moving.flag = false;
+            // }
+    {% else %}
+            // moving.flag = false;
+    {% endif %}
+  {% endif %}
+            // for (var i = 0; i < data.userscores.length; i++) {
+            //   $( "#UserScore" + i ).html( "$" + data.userscores[i] );
+            // }
+            // for (var i = 0; i < data.opponentsScores.length; i++) {
+            //   for (var j = 0; j < data.opponentsScores[i].length; j++) {
+            //     $( "#Opponent" + i + "Game" + j + "Score").html( "$" + data.opponentsScores[i][j] );
+            //   }
+            // }
+          }
+        }
+
+        var revealInterval = setInterval(function() {
+    {% if intermediate_information == True %}
+      {% if minutes_to_reveal or seconds_to_reveal %}
+          var minutes = $("#MinutesToReveal").html();
+          if(minutes.length == 0) {
+            minutes = 0;
+          }
+          else {
+            minutes = parseInt(minutes);
+          }
+          var seconds = $("#SecondsToReveal").html();
+          if(seconds.length == 0) {
+            seconds = 0;
+          }
+          else {
+            var seconds = parseInt(seconds);
+          }
+      {% else %}
+        var minutes = 0;
+        var seconds = 0;
+      {% endif %}
+    {% endif %}
+          if (!moving.flag) {
+            moving.flag = true;
+            $.ajax({
+              type: 'Post',
+              dataType: 'json',
+              url: "{% url 'knapsack:gamestatus' %}",
+              data: JSON.stringify({ 'userGameId': {{ userGameId }} }),
+              contentType: 'application/json; charset=utf-8',
+              success: function (data) {
+    {% if intermediate_information == True %}
+                checkGameStatus( data, moving, minutes, seconds );
+                moving.flag = false;
+    {% else %}
+                checkGameStatus( data, moving, 10, 10 );
+                moving.flag = false;
+    {% endif %}
+              }
+            });
+          }
+    {% if intermediate_information == True %}
+      {% if minutes_to_reveal or seconds_to_reveal %}
+            if (minutes != 0 && seconds == 0) {
+              $("#MinutesToReveal").html(minutes - 1);
+              $("#SecondsToReveal").html(59);
+            }
+            // Because if it is moving, the timer will never reach 0 and the mesage will never be shown.
+            else if (seconds != 0 && !(minutes == 0 && seconds == 1 && !notifiedIntermediateInformation)) {
+              $("#SecondsToReveal").html(seconds - 1);
+            }
+      {% endif %}
+    {% endif %}
+        }, 1000);
+{% endif %}
+
+        $(".Item").click(function() {
+          if (!moving.flag) {
+            var index = parseInt($(this).attr('id').substring(4, $(this).attr('id').length));
+            var to_knapsack = false;
+            var from_knapsack = false;
+            if (kanpsackItems.indexOf(index) > -1) {
+              from_knapsack = true;
+            }
+            else if (availableItems.indexOf(index) > -1) {
+              to_knapsack = true;
+            }
+            if (!$("#Item" + index).hasClass( "disabled" )) {
+              moving.flag = true;
+              $.ajax({
+                type: 'Post',
+                dataType: 'json',
+                url: '../{% if gameNum %}game{% else %}training{% endif %}/submit/',
+                data: JSON.stringify({ {% if gameNum %}'userGameId': {{ userGameId }}{% else %}'userTrainingId': {{ userTrainingId }}{% endif %}, 
+                  'item_index': index, 
+                  'item_value': items[index]['value'], 'to_knapsack': to_knapsack, 'from_knapsack': from_knapsack, }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                  windowWidth = $( window ).width();
+                  windowHeight = $( window ).height();
+
+                  itemsContainerLeft = $( "#ItemsContainer" ).css("left");
+                  itemsContainerLeftPercent = parseFloat(itemsContainerLeft.substring(0, itemsContainerLeft.length - 2)) * 100 / windowWidth;
+                  ItemsTitleTop = $( "#ItemsTitle" ).css("top");
+                  ItemsTitleTopPercent = parseFloat(ItemsTitleTop.substring(0, ItemsTitleTop.length - 2)) * 100 / windowHeight;
+                  ItemsTitleHeight = $( "#ItemsTitle" ).css("height");
+                  ItemsTitleHeightPercent = parseFloat(ItemsTitleHeight.substring(0, ItemsTitleHeight.length - 2)) * 100 / windowHeight;
+                  itemsContainerTopPercent = ItemsTitleTopPercent + ItemsTitleHeightPercent;
+                  $( "#ItemsContainer" ).css("top", itemsContainerTopPercent + "%");
+                  itemsContainerWidth = $( "#ItemsContainer" ).css("width");
+                  itemsContainerWidthPercent = parseFloat(itemsContainerWidth.substring(0, itemsContainerWidth.length - 2)) * 100 / windowWidth;
+                  knapsackContainerLeft = $( "#KnapsackItemsContainer" ).css("left");
+                  knapsackContainerLeftPercent = parseFloat(knapsackContainerLeft.substring(0, knapsackContainerLeft.length - 2)) * 100 / windowWidth;
+                  knapsackContainerTop = $( "#KnapsackItemsContainer" ).css("top");
+                  knapsackContainerTopPercent = parseFloat(knapsackContainerTop.substring(0, knapsackContainerTop.length - 2)) * 100 / windowHeight;
+
+                  totalAvailableLength = 0;
+                  for (i = 0; i < availableItems.length; i++) {
+                    var iWidth = $("#Item" + availableItems[i]).css("width");
+                    totalAvailableLength += parseFloat(iWidth.substring(0, iWidth.length - 2))* 100 / windowWidth;
+                  }
+                  totalknapsackLength = 0;
+                  for (i = 0; i < kanpsackItems.length; i++) {
+                    var iWidth = $("#Item" + kanpsackItems[i]).css("width");
+                    totalknapsackLength += parseFloat(iWidth.substring(0, iWidth.length - 2))* 100 / windowWidth;
+                  }
+
+                  if (availableItems.indexOf(index) > -1) {
+                    var itemFound = false;
+                    for (i = 0; i < availableItems.length; i++) { 
+                      if (itemFound) {
+                        var iLeft = $("#Item" + availableItems[i]).css("left");
+                        iLeft = parseFloat(iLeft.substring(0, iLeft.length - 2)) * 100 / windowWidth;
+                        var indexWidth = $("#Item" + index).css("width");
+                        indexWidth = parseFloat(indexWidth.substring(0, indexWidth.length - 2)) * 100 / windowWidth;
+                        var newLeft = (iLeft - indexWidth) + "%";
+                        $("#Item" + availableItems[i]).animate({ 
+                          left: newLeft,
+                        }, 1000, function() { moving.flag = false; } );
+                      }
+                      else if (availableItems[i] == index) {
+                        itemFound = true;
+                        availableItems.splice(availableItems.indexOf(index), 1);
+                        i--;
+                      }
+                    }
+                    $("#Item" + index).animate({ 
+                      left: (knapsackContainerLeftPercent + totalknapsackLength) + "%",
+                      top: knapsackContainerTopPercent + "%",
+                    }, 1000, function() { moving.flag = false; } );
+                    $("#Item" + index).attr( "data-original-title", "$" + items[index]['value'] + '<br>'
+                        + items[index]['weight'] + " Kg" + '<br>'
+                        + 'Click this item to take it out of your knapsack.' );
+                    kanpsackItems.push(index);
+                    totalknapsackValue += items[index]['value'];
+                    // if (totalknapsackValue >= {{ winning_score }}) {
+                    //   $("#KnapsackValue").css('color', 'green');
+                    // }
+                    // else {
+                    //   $("#KnapsackValue").css('color', 'red');
+                    // }
+                    $("#KnapsackValue").html(totalknapsackValue);
+                    // $("#Score").html(Math.round(totalknapsackValue / {{ optimal_score }} * 100) / 100);
+                    totalknapsackWeight += items[index]['weight'];
+                    $("#KnapsackWeight").html(totalknapsackWeight);
+                    $("#KnapsackWeightLeft").html(capacity - totalknapsackWeight);
+                    var indexWidth = $("#Item" + index).css("width");
+                    totalknapsackLength += parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+                    totalAvailableValue -= items[index]['value'];
+                    totalAvailableWeight -= items[index]['weight'];
+                    totalAvailableLength -= parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+                    for (i = 0; i < availableItems.length; i++) {
+                      if (items[availableItems[i]]['weight'] + totalknapsackWeight > capacity) {
+                        $("#Item" + availableItems[i]).addClass("disabled");
+                        $("#Item" + availableItems[i]).attr( "data-original-title", "$" + items[availableItems[i]]['value'] + '<br>'
+                            + items[availableItems[i]]['weight'] + " Kg" + '<br>'
+                            + 'Your knapsack is almost full. You cannot put this item into it.' );
+                      }
+                    }
+                  }
+                  else if (kanpsackItems.indexOf(index) > -1) {
+                    var itemFound = false;
+                    for (i = 0; i < kanpsackItems.length; i++) { 
+                      if (itemFound) {
+                        var iLeft = $("#Item" + kanpsackItems[i]).css("left");
+                        iLeft = parseFloat(iLeft.substring(0, iLeft.length - 2)) * 100 / windowWidth;
+                        var indexWidth = $("#Item" + index).css("width");
+                        indexWidth = parseFloat(indexWidth.substring(0, indexWidth.length - 2)) * 100 / windowWidth;
+                        var newLeft = (iLeft - indexWidth) + "%";
+                        $("#Item" + kanpsackItems[i]).animate({ 
+                          left: newLeft,
+                        }, 1000, function() { moving.flag = false; } );
+                      }
+                      else if (kanpsackItems[i] == index) {
+                        itemFound = true;
+                        kanpsackItems.splice(kanpsackItems.indexOf(index), 1);
+                        i--;
+                      }
+                    }
+                    $("#Item" + index).animate({ 
+                      left: (itemsContainerLeftPercent + totalAvailableLength) + "%",
+                      top: itemsContainerTopPercent + "%",
+                    }, 1000, function() { moving.flag = false; } );
+                    $("#Item" + index).attr( "data-original-title", "$" + items[index]['value'] + '<br>'
+                        + items[index]['weight'] + " Kg" + '<br>'
+                        + 'Click this item to move it into your knapsack.' );
+                    availableItems.push(index);
+                    totalAvailableValue += items[index]['value'];
+                    totalAvailableWeight += items[index]['weight'];
+                    var indexWidth = $("#Item" + index).css("width");
+                    totalAvailableLength += parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+                    totalknapsackValue -= items[index]['value'];
+                    // if (totalknapsackValue >= {{ winning_score }}) {
+                    //   $("#KnapsackValue").css('color', 'green');
+                    // }
+                    // else {
+                    //   $("#KnapsackValue").css('color', 'red');
+                    // }
+                    $("#KnapsackValue").html(totalknapsackValue);
+                    // $("#Score").html(Math.round(totalknapsackValue / {{ optimal_score }} * 100) / 100);
+                    totalknapsackWeight -= items[index]['weight'];
+                    $("#KnapsackWeight").html(totalknapsackWeight);
+                    $("#KnapsackWeightLeft").html(capacity - totalknapsackWeight);
+                    totalknapsackLength -= parseFloat(indexWidth.substring(0, indexWidth.length - 2))* 100 / windowWidth;
+                    for (i = 0; i < availableItems.length; i++) {
+                      if (items[availableItems[i]]['weight'] + totalknapsackWeight <= capacity) {
+                        $("#Item" + availableItems[i]).removeClass("disabled");
+                        $("#Item" + availableItems[i]).attr( "data-original-title", "$" + items[availableItems[i]]['value'] + '<br>'
+                            + items[availableItems[i]]['weight'] + " Kg" + '<br>'
+                            + 'Click this item to move it into your knapsack.' );
+                      }
+                    }
+                  }
+{% if gameNum %}
+                  checkGameStatus( data, moving, 10, 10 );
+{% else %}
+                  if (data.youWon) {
+                    $("#GameOverModalContent").removeClass("alert-danger");
+                    $("#GameOverModalContent").addClass("alert-success");
+                    $("#GameOverModalContent").children("h1").html("You won this training game! You'll see the results soon.");
+                    var gameOverModal = $('#GameOverModal');
+                    gameOverModal.css("display", "block");
+                    var QuitQuestionDIV = $('#QuitQuestion');
+                    QuitQuestionDIV.css("display", "none");
+                    setTimeout(function() {
+                      window.location.href = "{% url 'knapsack:results' %}?userTrainingId={{ userTrainingId }}{% if contestMode %}&userGameId={{ userGameId }}{% endif %}";
+                    }, 4000);
+                  }
+{% endif %}
+                },
+                error: function(data) {
+                  moving.flag = false;
+                }
+              });
+            }
+          }
+        });
+
+        $("#QuitBtn").click(function() {
+            event.preventDefault();
+            $("#GameOverModalContent").removeClass("alert-danger");
+            $("#GameOverModalContent").removeClass("alert-success");
+            $("#GameOverModalContent").addClass("alert-warning");
+            $("#GameOverModalContent").addClass("GameOverModalQuitContent");
+            $("#GameOverModalContent").children("h1").html("Tell us why you quit:");
+            var gameOverModal = $('#GameOverModal');
+            gameOverModal.css("display", "block");
+            var QuitQuestionDIV = $('#QuitQuestion');
+            QuitQuestionDIV.css("display", "block");
+            $.ajax({
+              type: 'Post',
+              dataType: 'json',
+              url: "{% url 'knapsack:quit' %}",
+              data: JSON.stringify({ {% if gameNum %}'userGameId': {{ userGameId }}{% endif %} }),
+              contentType: 'application/json; charset=utf-8',
+              error: function (request, status, error) {
+                alert( "An error occurred. Please try again! If it happened again, please contact oneweb@umich.edu with details about the error and what you see on the webpage. request: " + request.responseText + " status: " + status + "error: " + error );
+              }
+            });
+        });
+
+        $("#QuitQuestionForm").submit(function() {
+            event.preventDefault();
+            var WhyQuit = $('#WhyQuit').val();
+            var WasFeasible = $('input[name=WasFeasible]:checked').val();
+            var feasible = 0;
+            var infeasible = 0;
+            var notSure = 0;
+            if (WasFeasible == "Yes") {
+                feasible = 1;
+            }
+            else if (WasFeasible == "No") {
+                infeasible = 1;
+            }
+            else if (WasFeasible == "NotSure") {
+                notSure = 1;
+            }
+            $.ajax({
+              type: 'Post',
+              dataType: 'json',
+              url: "{% url 'knapsack:quitquestion' %}",
+              data: JSON.stringify({ {% if gameNum %}'userGameId': {{ userGameId }},{% endif %} 'WhyQuit': WhyQuit,
+                'feasible':feasible, 'infeasible': infeasible, 'notSure': notSure }),
+              contentType: 'application/json; charset=utf-8',
+              success: function (data) {
+                $("#WasFeasibleContinue").show();
+                $("#WasFeasibleSubmit").hide();
+                $("#WasFeasibleYesDIV").addClass("disabled");
+                $("#WasFeasibleYesDIV").removeClass("label-info");
+                if (data.WasFeasibleYes == 1 || data.WasFeasibleYes == 2) {
+                    $("#WasFeasibleYesDIV").addClass("label-success");
+                }
+                else {
+                    if (data.WasFeasibleYes == -2) {
+                        $("#WasFeasibleYesDIV").addClass("label-danger");
+                    }
+                    else {
+                        $("#WasFeasibleYesDIV").addClass("label-default");
+                    }
+                }
+                $("#WasFeasibleYes").prop('disabled', true);
+                if (data.WasFeasibleYes == 2 || data.WasFeasibleYes == -2) {
+                    $("#WasFeasibleYes").prop('checked', "checked");
+                }
+                $("#WasFeasibleNoDIV").addClass("disabled");
+                $("#WasFeasibleNoDIV").removeClass("label-info");
+                if (data.WasFeasibleNo == 1 || data.WasFeasibleNo == 2) {
+                    $("#WasFeasibleNoDIV").addClass("label-success");
+                }
+                else {
+                    if (data.WasFeasibleNo == -2) {
+                        $("#WasFeasibleNoDIV").addClass("label-danger");
+                    }
+                    else {
+                        $("#WasFeasibleNoDIV").addClass("label-default");
+                    }
+                }
+                $("#WasFeasibleNo").prop('disabled', true);
+                if (data.WasFeasibleNo == 2 || data.WasFeasibleNo == -2) {
+                    $("#WasFeasibleNo").prop('checked', "checked");
+                }
+                $("#WasFeasibleNotSureDIV").addClass("disabled");
+                $("#WasFeasibleNotSureDIV").removeClass("label-info");
+                if (data.WasFeasibleNotSure == 1 || data.WasFeasibleNotSure == 2) {
+                    $("#WasFeasibleNotSureDIV").addClass("label-success");
+                }
+                else {
+                    if (data.WasFeasibleNotSure == -2) {
+                        $("#WasFeasibleNotSureDIV").addClass("label-danger");
+                    }
+                    else {
+                        $("#WasFeasibleNotSureDIV").addClass("label-default");
+                    }
+                }
+                $("#WasFeasibleNotSure").prop('disabled', true);
+                if (data.WasFeasibleNotSure == 2 || data.WasFeasibleNotSure == -2) {
+                    $("#WasFeasibleNotSure").prop('checked', "checked");
+                }
+              },
+              error: function (request, status, error) {
+                alert( "An error occurred. Please try again! If it happened again, please contact oneweb@umich.edu with details about the error and what you see on the webpage. request: " + request.responseText + " status: " + status + "error: " + error );
+              }
+            });
+        });
+
+        $("#StartBtn").click(function() {
+          event.preventDefault();
+          $.ajax({
+              type: 'Post',
+              dataType: 'json',
+              url: "../{% if gameNum %}game{% else %}training{% endif %}/submit/",
+              data: JSON.stringify({ 'submitted': 1, 
+                {% if gameNum %}'userGameId': {{ userGameId }}{% else %}'userTrainingId': {{ userTrainingId }}{% endif %} }),
+              contentType: 'application/json; charset=utf-8',
+              success: function (data) {
+                window.location.href = "{% url 'knapsack:results' %}?userTrainingId={{ userTrainingId }}{% if contestMode %}&userGameId={{ userGameId }}{% endif %}";
+              },
+              error: function (request, status, error) {
+                // alert( "An error occurred. Please try again! If it happened again, please contact oneweb@umich.edu with details about the error and what you see on the webpage. request: " + request.responseText + " status: " + status + "error: " + error );
+              }
+          });
+        });
+
+        modalObj.hidePleaseWait();
+      }, 1000);
+
+      $( window ).resize(function() {
+        modalObj.showPleaseWait();
+
+        setTimeout( function() {
+          var windowSizes = adaptFontSizes();
+          windowWidth = windowSizes[0];
+          windowHeight = windowSizes[1];
+
+          ItemsTitleTop = $( "#ItemsTitle" ).css("top");
+          ItemsTitleTopPercent = parseFloat(ItemsTitleTop.substring(0, ItemsTitleTop.length - 2)) * 100 / windowHeight;
+          ItemsTitleHeight = $( "#ItemsTitle" ).css("height");
+          ItemsTitleHeightPercent = parseFloat(ItemsTitleHeight.substring(0, ItemsTitleHeight.length - 2)) * 100 / windowHeight;
+          itemsContainerTopPercent = ItemsTitleTopPercent + ItemsTitleHeightPercent;
+          $( "#ItemsContainer" ).css("top", itemsContainerTopPercent + "%");
+          for (i = 0; i < availableItems.length; i++) {
+            $("#Item" + availableItems[i]).css("top", itemsContainerTopPercent + "%");
+          }
+          AdaptAvailableItemsText(availableItems, windowHeight);
+          AdaptAvailableItemsText(kanpsackItems, windowHeight);
+          // for (i = 0; i < kanpsackItems.length; i++) {
+            // ItemWidth = $( "#Item" + kanpsackItems[i] ).css("width");
+            // ItemWidth = parseFloat(ItemWidth.substring(0, ItemWidth.length - 2));
+            // if (ItemWidth < $("#Item" + kanpsackItems[i]).find(".Value").textWidth()) {
+            //   $("#Item" + kanpsackItems[i]).find(".Value").css("top", "100%");
+            //   $("#Item" + kanpsackItems[i]).find(".Weight").css("top", "121%");
+            //   // $("#Item" + kanpsackItems[i]).css("color", "#000000");
+            //   // $("#Item" + kanpsackItems[i]).css("color", "#000000");
+            //   // $("#Item" + kanpsackItems[i]).css("text-shadow", "0 0 0");
+            //   // $("#Item" + kanpsackItems[i]).css("text-shadow", "0 0 0");
+            // }
+            // else {
+            //   $("#Item" + kanpsackItems[i]).find(".Value").css("top", "19%");
+            //   $("#Item" + kanpsackItems[i]).find(".Weight").css("top", "52%");
+            //   // $("#Item" + kanpsackItems[i]).css("color", "#ffffff");
+            //   // $("#Item" + kanpsackItems[i]).css("color", "#ffffff");
+            //   // $("#Item" + kanpsackItems[i]).css("text-shadow", "1px 1px 0px #cc9f52");
+            //   // $("#Item" + kanpsackItems[i]).css("text-shadow", "1px 1px 0px #cc9f52");
+            // }
+          // }
+          modalObj.hidePleaseWait();
+        }, 1000);
+      });
+
+      // Game timer setup.
+
+      // var ts = new Date(2012, 0, 1),
+      //   newYear = true;
+
+      // if((new Date()) > ts){
+      //   // The new year is here! Count towards something else.
+      //   // Notice the *1000 at the end - time must be in milliseconds
+      //   ts = (new Date()).getTime() + {{ max_minutes }} *60*1000 + {{ max_seconds }} *1000;
+      //   newYear = false;
+      // }
+
+      // $('#countdown').countdown({
+      //   timestamp : ts,
+      // });
+
+    });
+
+    // // Number of seconds in every time division
+    // var days  = 24*60*60,
+    //   hours = 60*60,
+    //   minutes = 60,
+    //   timeIsUp = false;
+    
+    // // Creating the plugin
+    // $.fn.countdown = function(prop){
+      
+    //   var options = $.extend({
+    //     callback  : function(){},
+    //     timestamp : 0
+    //   },prop);
+      
+    //   var left, d, h, m, s, positions;
+
+    //   // Initialize the plugin
+    //   init(this, options);
+      
+    //   positions = this.find('.position');
+      
+    //   (function tick(){
+        
+    //     // Time left
+    //     left = Math.floor((options.timestamp - (new Date())) / 1000);
+        
+    //     if(left < 0){
+    //       left = 0;
+    //     }
+        
+    //     // Number of days left
+    //     d = Math.floor(left / days);
+    //     updateDuo(0, 1, d);
+    //     left -= d*days;
+        
+    //     // Number of hours left
+    //     h = Math.floor(left / hours);
+    //     updateDuo(2, 3, h);
+    //     left -= h*hours;
+        
+    //     // Number of minutes left
+    //     m = Math.floor(left / minutes);
+    //     updateDuo(4, 5, m);
+    //     left -= m*minutes;
+        
+    //     // Number of seconds left
+    //     s = left;
+    //     if (m == 0 && s == 0) {
+    //       timeIsUp = true;
+    //       $.ajax({
+    //           type: 'Post',
+    //           dataType: 'json',
+    //           url: "../{% if gameNum %}game{% else %}training{% endif %}/submit/",
+    //           data: JSON.stringify({ 'submitted': 1, 
+    //             {% if gameNum %}'userGameId': {{ userGameId }}{% else %}'userTrainingId': {{ userTrainingId }}{% endif %} }),
+    //           contentType: 'application/json; charset=utf-8',
+    //           success: function (data) {
+    //           },
+    //           error: function (data) {
+    //             alert( "An error occurred. Please try again! If it happened again, please contact oneweb@umich.edu with details about the error and what you see on the webpage." );
+    //           }
+    //       });
+    //     }
+    //     else {
+    //       updateDuo(6, 7, s);
+          
+    //       // Calling an optional user supplied callback
+    //       options.callback(d, h, m, s);
+          
+    //       // Scheduling another call of this function in 1s
+    //       setTimeout(tick, 1000);
+    //     }
+    //   })();
+      
+    //   // This function updates two digit positions at once
+    //   function updateDuo(minor,major,value){
+    //     switchDigit(positions.eq(minor),Math.floor(value/10)%10);
+    //     switchDigit(positions.eq(major),value%10);
+    //   }
+      
+    //   return this;
+    // };
+
+
+    // function init(elem, options){
+    //   elem.addClass('countdownHolder');
+
+    //   // Creating the markup inside the container
+    //   $.each(['Days','Hours','Minutes','Seconds'],function(i){
+    //     $('<span class="count'+this+'">').html(
+    //       '<span class="position">\
+    //         <span class="digit static">0</span>\
+    //       </span>\
+    //       <span class="position">\
+    //         <span class="digit static">0</span>\
+    //       </span>'
+    //     ).appendTo(elem);
+        
+    //     if(this!="Seconds"){
+    //       elem.append('<span class="countDiv countDiv'+i+'"></span>');
+    //     }
+    //   });
+
+    // }
+
+    // // Creates an animated transition between the two numbers
+    // function switchDigit(position,number){
+      
+    //   var digit = position.find('.digit')
+      
+    //   if(digit.is(':animated')){
+    //     return false;
+    //   }
+      
+    //   if(position.data('digit') == number){
+    //     // We are already showing this number
+    //     return false;
+    //   }
+      
+    //   position.data('digit', number);
+      
+    //   var replacement = $('<span>',{
+    //     'class':'digit',
+    //     css:{
+    //       top:'-2.1em',
+    //       opacity:0
+    //     },
+    //     html:number
+    //   });
+      
+    //   // The .static class is added when the animation
+    //   // completes. This makes it run smoother.
+      
+    //   digit
+    //     .before(replacement)
+    //     .removeClass('static')
+    //     .animate({top:'2.5em',opacity:0},'fast',function(){
+    //       digit.remove();
+    //     })
+
+    //   replacement
+    //     .delay(100)
+    //     .animate({top:0,opacity:1},'fast',function(){
+    //       replacement.addClass('static');
+    //     });
+    // }
+
+  </script>
+{% endblock %}

@@ -1,0 +1,89 @@
+.countdownHolder{
+    width:100%;
+    margin:0 auto;
+    font: 40px/1.5 'Open Sans Condensed',sans-serif;
+    text-align:center;
+    letter-spacing:-3px;
+}
+
+.position{
+    display: inline-block;
+    height: 1.6em;
+    overflow: hidden;
+    position: relative;
+    width: 0.55em;
+}
+
+.digit{
+    position:absolute;
+    display:block;
+    width:1%;
+    text-align:center;
+    color:#dddddd;
+    letter-spacing:-1px;
+}
+
+.countdownHolderWaiting .digit{
+    position:absolute;
+    display:block;
+    width:1%;
+    text-align:center;
+    color:#000000;
+    letter-spacing:-1px;
+}
+
+.digit.static{
+}
+
+.countDays{ display:none !important; }
+.countDiv0{ display:none !important; }
+.countHours{ display:none !important; }
+.countDiv1{ display:none !important; }
+.countMinutes{}
+.countDiv2{}
+.countSeconds{}
+
+
+.countDiv{
+    display:inline-block;
+    width:16px;
+    height:1.6em;
+    position:relative;
+}
+
+.countdownHolderWaiting .countDiv{
+    display:inline-block;
+    width:16px;
+    height:1.84em;
+    position:relative;
+}
+
+.countDiv:before,
+.countDiv:after{
+    position:absolute;
+    width:5px;
+    height:5px;
+    background-color:#dddddd;
+    border-radius:50%;
+    left:50%;
+    margin-left:-3px;
+    top:0.5em;
+    content:'';
+}
+
+.countdownHolderWaiting .countDiv:before,
+.countDiv:after{
+    position:absolute;
+    width:5px;
+    height:5px;
+    background-color:#000000;
+    border-radius:50%;
+    left:50%;
+    margin-left:-3px;
+    top:0.5em;
+    content:'';
+}
+
+.countDiv:after{
+    top:0.9em;
+}

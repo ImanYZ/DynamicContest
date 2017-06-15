@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack Survey{% endblock %}
+
+{% block headertitle %}Knapsack Post-Experiment Survey{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <p style="margin-top:40px;">Please answer the following survey questions. Your answers will be used for this study only. Individual data will not be exposed.</p>
+    <div class="form-group">
+      <label for="AgeInput">What is your age?</label>
+      <input type="text" class="form-control number-only" style="width:97%;" id="AgeInput" placeholder="Please enter an appropriate number for your age."></input>
+    </div>
+    <div id="AgeInputError" role="alert" class="alert alert-danger" style="display:none;">
+      <b>Please specify your age.</b>
+    </div>
+    <p><b>What is your gender?</b></p>
+    <label class="radio-inline">
+      <input type="radio" name="Gender" id="Female" value="Female">
+      Female
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="Gender" id="Male" value="Male">
+      Male
+    </label>
+    <br><br>
+  <!--   <div id="GenderError" role="alert" class="alert alert-danger" style="display:none;">
+      <b>Please specify your gender.</b>
+    </div> -->
+    <div class="form-group">
+      <label for="SiblingsInput">How many siblings do you have?</label>
+      <input type="text" class="form-control number-only" style="width:97%;" id="SiblingsInput" placeholder="Please enter the number of your siblings."></input>
+    </div>
+    <div id="SiblingsInputError" role="alert" class="alert alert-danger" style="display:none;">
+      <b>Please specify the number of your siblings.</b>
+    </div>
+    <p><b>What is your major at the University of Michigan?</b></p>
+    <div class="form-group">
+      <input type="text" class="form-control" style="width:97%;" id="Major" placeholder="Please specify your major at the University of Michigan." maxlength="255"></input>
+    </div>
+    <p><b>Are you an undergraduate or graduate student?</b></p>
+    <label class="radio-inline">
+      <input type="radio" name="Graduate" id="Undergraduate" value="Undergraduate">
+      Undergraduate student
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="Graduate" id="Graduate" value="Graduate">
+      Graduate student
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="Graduate" id="Notstudent" value="Not a student">
+      Not a student
+    </label>
+    <br><br>
+    <div class="form-group">
+      <label for="ProgramYearInput">Which year are you in your program?</label>
+      <input type="text" class="form-control number-only" style="width:97%;" id="ProgramYearInput" placeholder="Please enter an appropriate number for your year in the program."></input>
+    </div>
+    <div id="ProgramYearInputError" role="alert" class="alert alert-danger" style="display:none;">
+      <b>Please specify which year you are in your program.</b>
+    </div>
+    <p><b>Have you ever participated in any economics or psychology experimental studies before?</b></p>
+    <label class="radio-inline">
+      <input type="radio" name="Participatedbefore" id="ParticipatedbeforeYes" value="Yes">
+      Yes
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="Participatedbefore" id="ParticipatedbeforeNo" value="No">
+      No
+    </label>
+    <br><br>
+    <p><b>What do you consider your racial or ethnic background to be?</b></p>
+    <div class="radio">
+      <label>
+        <input type="radio" name="Ethnicity" value="White">
+        White
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="Ethnicity" value="Asian">
+        Asian
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="Ethnicity" value="African American">
+        African American
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="Ethnicity" value="Hispanic">
+        Hispanic
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="Ethnicity" value="Multiracial">
+        Multiracial
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="Ethnicity" value="Native American">
+        Native American
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="Ethnicity" value="Other Ethnicity" id="OtherEthnicity">
+        Other Ethnicity, please specify
+      </label>
+      <div class="form-group">
+        <input type="text" id="OtherEthnicityInput" class="form-control" style="width:97%;" id="Major" placeholder="Please specify your ethnicity." maxlength="255"></input>
+      </div>
+    </div>
+  <!--   <div id="EthnicityError" role="alert" class="alert alert-danger" style="display:none;">
+      Please specify your ethnicity.
+    </div> -->
+    <p><b>I will stick to my opinion if I think I am right, even if others disagree.</b></p>
+    <div class="radio">
+      <label>
+        <input type="radio" name="StickOpinion" value="Strongly disagree">
+        Strongly disagree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="StickOpinion" value="Disagree">
+        Disagree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="StickOpinion" value="Neutral">
+        Neutral
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="StickOpinion" value="Agree">
+        Agree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="StickOpinion" value="Strongly agree">
+        Strongly agree
+      </label>
+    </div>
+    <p><b>It’s achievement, rather than popularity with others, that gets you ahead nowadays.</b></p>
+    <div class="radio">
+      <label>
+        <input type="radio" name="achievement" value="Strongly disagree">
+        Strongly disagree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="achievement" value="Disagree">
+        Disagree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="achievement" value="Neutral">
+        Neutral
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="achievement" value="Agree">
+        Agree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="achievement" value="Strongly agree">
+        Strongly agree
+      </label>
+    </div>
+    <p><b>I will change the opinion I express as a result of an onslaught of criticism, even though I really don’t change the way I feel.</b></p>
+    <div class="radio">
+      <label>
+        <input type="radio" name="changeopinion" value="Strongly disagree">
+        Strongly disagree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="changeopinion" value="Disagree">
+        Disagree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="changeopinion" value="Neutral">
+        Neutral
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="changeopinion" value="Agree">
+        Agree
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="changeopinion" value="Strongly agree">
+        Strongly agree
+      </label>
+    </div>
+    <div class="form-group">
+      <label for="strategies">Describe your strategies when you solve the knapsack problems.</label>
+      <textarea type="text" class="form-control" style="width:100%; height:250px;" id="strategies" placeholder="Please describe your strategies."></textarea>
+    </div>
+    <div class="row" style="margin-bottom:40px;">
+      <div class="col-xs-4 ">
+      </div>
+      <div class="col-xs-4 ">
+        <button id="SubmitBtn" type="submit" class="btn btn-lg btn-success">Submit &amp; Quit</button>
+      </div>
+      <div class="col-xs-4 ">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+      $('.number-only').keypress(function(e) {
+        if(isNaN(this.value+""+String.fromCharCode(e.charCode))) return false;
+      })
+      .on("cut copy paste",function(e){
+        e.preventDefault();
+      });
+       
+      $( "#SubmitBtn" ).click(function( event ) {
+       
+          var errorInPage = false;
+
+          // Get some values from elements on the page:
+          var age = $('#AgeInput').val();
+          if (age == null || age == "") {
+            age = -1;
+          }
+          else if (parseInt(age) > 100 || parseInt(age) < 7 ) {
+            $("#AgeInputError").show();
+            errorInPage = true;
+            age = 0;
+          }
+          else {
+            $("#AgeInputError").hide();
+          }
+          var gender = $('input[name=Gender]:checked').val();
+          // if (!gender || gender == "") {
+          //   $("#GenderError").show();
+          //   errorInPage = true;
+          // }
+          // else {
+          //   $("#GenderError").hide();
+          // }
+          var male = 0;
+          var female = 0;
+          if (gender == "Male") {
+            male = 1;
+          }
+          else {
+            female = 1;
+          }
+          var siblings = $('#SiblingsInput').val();
+          if (siblings == null || siblings == "") {
+            siblings = -1;
+          }
+          else if (parseInt(siblings) > 40 || parseInt(siblings) < 0 ) {
+            $("#SiblingsInputError").show();
+            errorInPage = true;
+            siblings = 0;
+          }
+          else {
+            $("#SiblingsInputError").hide();
+          }
+          var major = $('#Major').val();
+          var graduateStatus = $('input[name=Graduate]:checked').val();
+          // if (!gender || gender == "") {
+          //   $("#GenderError").show();
+          //   errorInPage = true;
+          // }
+          // else {
+          //   $("#GenderError").hide();
+          // }
+          var undergraduate = 0;
+          var graduate = 0;
+          var notstudent = 0;
+          if (graduateStatus == "Undergraduate") {
+            undergraduate = 1;
+          }
+          else if (graduateStatus == "Graduate") {
+            graduate = 1;
+          }
+          else if (graduateStatus == "Not a student") {
+            notstudent = 1;
+          }
+          var programYear = $('#ProgramYearInput').val();
+          if (programYear == null || programYear == "") {
+            programYear = -1;
+          }
+          else if (parseInt(programYear) > 50 || parseInt(programYear) <= 0 ) {
+            $("#ProgramYearInputError").show();
+            errorInPage = true;
+            programYear = 0;
+          }
+          else {
+            $("#ProgramYearInputError").hide();
+          }
+          var participatedbefore = $('input[name=Participatedbefore]:checked').val();
+          if (participatedbefore == "Yes") {
+            participatedbefore = 1;
+          }
+          else {
+            participatedbefore = 0;
+          }
+          var white = 0;
+          var asian = 0;
+          var africanamerican = 0;
+          var hispanic = 0;
+          var multiracial = 0;
+          var nativeamerican = 0;
+          var ethnicity = $('input[name=Ethnicity]:checked').val();
+          if (ethnicity == "White") {
+            white = 1;
+          }
+          else if (ethnicity == "Asian") {
+            asian = 1;
+          }
+          else if (ethnicity == "African American") {
+            africanamerican = 1;
+          }
+          else if (ethnicity == "Hispanic") {
+            hispanic = 1;
+          }
+          else if (ethnicity == "Multiracial") {
+            multiracial = 1;
+          }
+          else if (ethnicity == "Native American") {
+            nativeamerican = 1;
+          }
+          var otherethnicity = $('#OtherEthnicityInput').val();
+
+          var stickOpinion = 0
+          var stickOpinionValue = $('input[name=StickOpinion]:checked').val();
+          if (stickOpinionValue == "Strongly disagree") {
+            stickOpinion = 1;
+          }
+          else if (stickOpinionValue == "Disagree") {
+            stickOpinion = 2;
+          }
+          else if (stickOpinionValue == "Neutral") {
+            stickOpinion = 3;
+          }
+          else if (stickOpinionValue == "Agree") {
+            stickOpinion = 4;
+          }
+          else if (stickOpinionValue == "Strongly agree") {
+            stickOpinion = 5;
+          }
+          var achievement = 0
+          var achievementValue = $('input[name=achievement]:checked').val();
+          if (achievementValue == "Strongly disagree") {
+            achievement = 1;
+          }
+          else if (achievementValue == "Disagree") {
+            achievement = 2;
+          }
+          else if (achievementValue == "Neutral") {
+            achievement = 3;
+          }
+          else if (achievementValue == "Agree") {
+            achievement = 4;
+          }
+          else if (achievementValue == "Strongly agree") {
+            achievement = 5;
+          }
+          var changeopinion = 0
+          var changeopinionValue = $('input[name=changeopinion]:checked').val();
+          if (changeopinionValue == "Strongly disagree") {
+            changeopinion = 1;
+          }
+          else if (changeopinionValue == "Disagree") {
+            changeopinion = 2;
+          }
+          else if (changeopinionValue == "Neutral") {
+            changeopinion = 3;
+          }
+          else if (changeopinionValue == "Agree") {
+            changeopinion = 4;
+          }
+          else if (changeopinionValue == "Strongly agree") {
+            changeopinion = 5;
+          }
+          var strategies = $('#strategies').val();
+
+          if (!errorInPage) {
+            // Send the data using post
+            var jqxhr = $.post( "{% url 'knapsack:surveysubmit' %}", { 'age': age, 'male': male, 'female': female, 'siblings': siblings, 'major': major, 'undergraduate': undergraduate, 'graduate': graduate, 'notstudent': notstudent, 'programyear': programYear, 'participatedbefore': participatedbefore, 'white': white, 'asian': asian, 'africanamerican': africanamerican, 'hispanic': hispanic, 'multiracial': multiracial, 'nativeamerican': nativeamerican, 'otherethnicity': otherethnicity, 'stickopinion': stickOpinion, 'achievement': achievement, 'changeopinion': changeopinion, 'strategies': strategies })
+                .done(function(data) {
+                    window.location.href = "{% url 'knapsack:final' %}";
+                })
+                .fail(function() {
+                    alert("Unfortunately your feedback has not been received. Please submit your feedback again. If you have seen this message repeatedly, please make sure you are connected to the Internet, Refresh the page and Submit your feedback again. Also, please feel free to contact us at: oneweb@umich.edu");
+                });
+          }
+      });
+    });
+  </script>
+{% endblock %}

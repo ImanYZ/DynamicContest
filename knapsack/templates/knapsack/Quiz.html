@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack Quiz{% endblock %}
+
+{% block headertitle %}Knapsack Review Questions{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <p style="margin-top:40px;">To make sure that everyone understands the instructions, you will be asked a number of
+        review questions. After finishing with these questions, you will see the answers.</p>
+    <p>Feel free to refer to the printed experimental instructions before you answer any question.
+        Each correct answer is worth 20 cents, and will be added to your total earnings.</p>
+    <p class="questionP">How many people are there in your group?</p>
+    <div class="radio lb-lg label {% if GroupSize3 %}disabled {% if GroupSize3 == 1 or GroupSize3 == 2 %}label-success{% else %}{% if GroupSize3 == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="GroupSize" id="GroupSize3" value="3" {% if GroupSize3 %}disabled {% if GroupSize3 == 2 or GroupSize3 == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      3
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if GroupSize4 %}disabled {% if GroupSize4 == 1 or GroupSize4 == 2 %}label-success{% else %}{% if GroupSize4 == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="GroupSize" id="GroupSize4" value="4" {% if GroupSize4 %}disabled {% if GroupSize4 == 2 or GroupSize4 == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      4
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if GroupSize12 %}disabled {% if GroupSize12 == 1 or GroupSize12 == 2 %}label-success{% else %}{% if GroupSize12 == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="GroupSize" id="GroupSize12" value="12" {% if GroupSize12 %}disabled {% if GroupSize12 == 2 or GroupSize12 == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      12
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if GroupSizeNotSure %}disabled {% if GroupSizeNotSure == 1 or GroupSizeNotSure == 2 %}label-success{% else %}{% if GroupSizeNotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="GroupSize" id="GroupSizeNotSure" value="NotSure" {% if GroupSizeNotSure %}disabled {% if GroupSizeNotSure == 2 or GroupSizeNotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      I am not sure.
+    </div>
+    <br><br>
+    <p class="questionP">In the contest phase, are you going to play against the same opponent more than once?</p>
+    <div class="radio lb-lg label {% if SameOpponentYes %}disabled {% if SameOpponentYes == 1 or SameOpponentYes == 2 %}label-success{% else %}{% if SameOpponentYes == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="SameOpponent" id="SameOpponentYes" value="Yes" {% if SameOpponentYes %}disabled {% if SameOpponentYes == 2 or SameOpponentYes == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      Yes
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if SameOpponentNo %}disabled {% if SameOpponentNo == 1 or SameOpponentNo == 2 %}label-success{% else %}{% if SameOpponentNo == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="SameOpponent" id="SameOpponentNo" value="No" {% if SameOpponentNo %}disabled {% if SameOpponentNo == 2 or SameOpponentNo == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      No
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if SameOpponentNotSure %}disabled {% if SameOpponentNotSure == 1 or SameOpponentNotSure == 2 %}label-success{% else %}{% if SameOpponentNotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="SameOpponent" id="SameOpponentNotSure" value="NotSure" {% if SameOpponentNotSure %}disabled {% if SameOpponentNotSure == 2 or SameOpponentNotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      I am not sure.
+    </div>
+    <br><br>
+    <p class="questionP">True or false: An infeasible game can be solved if I try hard enough.</p>
+    <div class="radio lb-lg label {% if InfeasibleIsSolvableTrue %}disabled {% if InfeasibleIsSolvableTrue == 1 or InfeasibleIsSolvableTrue == 2 %}label-success{% else %}{% if InfeasibleIsSolvableTrue == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="InfeasibleIsSolvable" id="InfeasibleIsSolvableTrue" value="True" {% if InfeasibleIsSolvableTrue %}disabled {% if InfeasibleIsSolvableTrue == 2 or InfeasibleIsSolvableTrue == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      True
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if InfeasibleIsSolvableFalse %}disabled {% if InfeasibleIsSolvableFalse == 1 or InfeasibleIsSolvableFalse == 2 %}label-success{% else %}{% if InfeasibleIsSolvableFalse == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="InfeasibleIsSolvable" id="InfeasibleIsSolvableFalse" value="False" {% if InfeasibleIsSolvableFalse %}disabled {% if InfeasibleIsSolvableFalse == 2 or InfeasibleIsSolvableFalse == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      False
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if InfeasibleIsSolvableNotSure %}disabled {% if InfeasibleIsSolvableNotSure == 1 or InfeasibleIsSolvableNotSure == 2 %}label-success{% else %}{% if InfeasibleIsSolvableNotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="InfeasibleIsSolvable" id="InfeasibleIsSolvableNotSure" value="NotSure" {% if InfeasibleIsSolvableNotSure %}disabled {% if InfeasibleIsSolvableNotSure == 2 or InfeasibleIsSolvableNotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      I am not sure.
+    </div>
+    <br><br>
+    <p class="questionP">True or false: In a contest, you are told that “the chance that Game 1 is feasible is 100%.” This means that
+        the target value can be reached.</p>
+    <div class="radio lb-lg label {% if SureGameTrue %}disabled {% if SureGameTrue == 1 or SureGameTrue == 2 %}label-success{% else %}{% if SureGameTrue == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="SureGame" id="SureGameTrue" value="True" {% if SureGameTrue %}disabled {% if SureGameTrue == 2 or SureGameTrue == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      True
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if SureGameFalse %}disabled {% if SureGameFalse == 1 or SureGameFalse == 2 %}label-success{% else %}{% if SureGameFalse == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="SureGame" id="SureGameFalse" value="False" {% if SureGameFalse %}disabled {% if SureGameFalse == 2 or SureGameFalse == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      False
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if SureGameNotSure %}disabled {% if SureGameNotSure == 1 or SureGameNotSure == 2 %}label-success{% else %}{% if SureGameNotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="SureGame" id="SureGameNotSure" value="NotSure" {% if SureGameNotSure %}disabled {% if SureGameNotSure == 2 or SureGameNotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      I am not sure.
+    </div>
+    <br><br>
+    <p class="questionP">In a contest, you are told that “the chance that Game 1 is feasible is 60%.” Which of the following statements
+        are correct?</p>
+    <div class="radio lb-lg label {% if Feasible60Infeasible40 %}disabled {% if Feasible60Infeasible40 == 1 or Feasible60Infeasible40 == 2 %}label-success{% else %}{% if Feasible60Infeasible40 == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="Feasible60" id="Feasible60Infeasible40" value="Infeasible40" {% if Feasible60Infeasible40 %}disabled {% if Feasible60Infeasible40 == 2 or Feasible60Infeasible40 == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      The likelihood that Game 1 is infeasible is 40%.
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if Feasible60Target40 %}disabled {% if Feasible60Target40 == 1 or Feasible60Target40 == 2 %}label-success{% else %}{% if Feasible60Target40 == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="Feasible60" id="Feasible60Target40" value="Target40" {% if Feasible60Target40 %}disabled {% if Feasible60Target40 == 2 or Feasible60Target40 == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      The likelihood that the target value can be reached is 40%.
+    </div>
+    <br><br>
+    <div class="radio lb-lg label {% if Feasible60NotSure %}disabled {% if Feasible60NotSure == 1 or Feasible60NotSure == 2 %}label-success{% else %}{% if Feasible60NotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" name="Feasible60" id="Feasible60NotSure" value="NotSure" {% if Feasible60NotSure %}disabled {% if Feasible60NotSure == 2 or Feasible60NotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      I am not sure.
+    </div>
+    <br><br>
+    <div class="row" style="margin-bottom:40px;">
+      <div class="col-xs-4 ">
+      </div>
+      <div class="col-xs-4 ">
+        {% if phase and phase == 'quiz' %}
+            <a href="{% url 'knapsack:quizresults' %}" class="btn btn-lg btn-success">Continue</a>
+        {% else %}
+            <button id="SubmitBtn" type="submit" class="btn btn-lg btn-success">Submit</button>
+        {% endif %}
+      </div>
+      <div class="col-xs-4 ">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//again because google chrome don't insert first hash into history
+    window.onhashchange=function(){window.location.hash="no-back-button";}
+
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+      $('.number-only').keypress(function(e) {
+        if(isNaN(this.value+""+String.fromCharCode(e.charCode))) return false;
+      })
+      .on("cut copy paste",function(e){
+        e.preventDefault();
+      });
+       
+      $( "#SubmitBtn" ).click(function( event ) {
+       
+          var errorInPage = false;
+
+          var GroupSize = $('input[name=GroupSize]:checked').val();
+          var GroupSize3 = 0;
+          var GroupSize4 = 0;
+          var GroupSize12 = 0;
+          var GroupSizeNotSure = 0;
+          if (GroupSize == "3") {
+            GroupSize3 = 1;
+          }
+          else if (GroupSize == "4") {
+            GroupSize4 = 1;
+          }
+          else if (GroupSize == "12") {
+            GroupSize12 = 1;
+          }
+          else if (GroupSize == "NotSure") {
+            GroupSizeNotSure = 1;
+          }
+          var SameOpponent = $('input[name=SameOpponent]:checked').val();
+          var SameOpponentYes = 0;
+          var SameOpponentNo = 0;
+          var SameOpponentNotSure = 0;
+          if (SameOpponent == "Yes") {
+            SameOpponentYes = 1;
+          }
+          else if (SameOpponent == "No") {
+            SameOpponentNo = 1;
+          }
+          else if (SameOpponent == "NotSure") {
+            SameOpponentNotSure = 1;
+          }
+          var InfeasibleIsSolvable = $('input[name=InfeasibleIsSolvable]:checked').val();
+          var InfeasibleIsSolvableTrue = 0;
+          var InfeasibleIsSolvableFalse = 0;
+          var InfeasibleIsSolvableNotSure = 0;
+          if (InfeasibleIsSolvable == "True") {
+            InfeasibleIsSolvableTrue = 1;
+          }
+          else if (InfeasibleIsSolvable == "False") {
+            InfeasibleIsSolvableFalse = 1;
+          }
+          else if (InfeasibleIsSolvable == "NotSure") {
+            InfeasibleIsSolvableNotSure = 1;
+          }
+          var SureGame = $('input[name=SureGame]:checked').val();
+          var SureGameTrue = 0;
+          var SureGameFalse = 0;
+          var SureGameNotSure = 0;
+          if (SureGame == "True") {
+            SureGameTrue = 1;
+          }
+          else if (SureGame == "False") {
+            SureGameFalse = 1;
+          }
+          else if (SureGame == "NotSure") {
+            SureGameNotSure = 1;
+          }
+          var Feasible60 = $('input[name=Feasible60]:checked').val();
+          var Feasible60Infeasible40 = 0;
+          var Feasible60Target40 = 0;
+          var Feasible60NotSure = 0;
+          if (Feasible60 == "Infeasible40") {
+            Feasible60Infeasible40 = 1;
+          }
+          else if (Feasible60 == "Target40") {
+            Feasible60Target40 = 1;
+          }
+          else if (Feasible60 == "NotSure") {
+            Feasible60NotSure = 1;
+          }
+          if (!errorInPage) {
+            window.location.href = ("{% url 'knapsack:quizsubmit' %}?GroupSize3=" + GroupSize3 +
+                '&GroupSize4=' + GroupSize4 + '&GroupSize12=' + GroupSize12 +
+                '&GroupSizeNotSure=' + GroupSizeNotSure +
+                '&SameOpponentYes=' + SameOpponentYes +
+                '&SameOpponentNo=' + SameOpponentNo +
+                '&SameOpponentNotSure=' + SameOpponentNotSure +
+                '&InfeasibleIsSolvableTrue=' + InfeasibleIsSolvableTrue +
+                '&InfeasibleIsSolvableFalse=' + InfeasibleIsSolvableFalse +
+                '&InfeasibleIsSolvableNotSure=' + InfeasibleIsSolvableNotSure +
+                '&SureGameTrue=' + SureGameTrue +
+                '&SureGameFalse=' + SureGameFalse +
+                '&SureGameNotSure=' + SureGameNotSure +
+                '&Feasible60Infeasible40=' + Feasible60Infeasible40 +
+                '&Feasible60Target40=' + Feasible60Target40 +
+                '&Feasible60NotSure=' + Feasible60NotSure);
+          }
+      });
+    });
+  </script>
+{% endblock %}

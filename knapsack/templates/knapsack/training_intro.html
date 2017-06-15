@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Welcome to the Knapsack Training!{% endblock %}
+
+{% block headertitle %}Training Introduction{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <h1 class="WelcomeTitle"><img src="{% static 'knapsack/media/mochila_Orange.svg' %}" alt="Knapsack Game Logo" width="70px" height="70px" style="max-width:100px; margin-top: -25px;">Knapsack Game!</h1>
+    <div style="margin-top:40px;">
+        <h2>Training Phase Instructions</h2>
+
+        <p>The items, along with their dollar values and weights, are displayed in a pool on top of the page.  Clicking on an item adds it to the knapsack (if it fits).  Clicking on an item in the knapsack removes it and returns it back to the pool of items not in the knapsack. You can add and remove items as many times as you like before you submit your solution.</p>
+        <p>If you succeed in fitting the target value (or higher) into the knapsack, your answer will be submitted automatically and you will go on to the next game.  You can also click the "Submit" button at any time to go on to the next game even if you were unable to fit the target value into the knapsack. As explained, you will be paid ${{ training_earning }} for every game in which you reach the target value, and if you do not reach the target value, you will not be paid anything.</p>
+        <p>Training games are always <strong>feasible</strong>, that is, the target value can always be reached.</p>
+        <p>You will have a total of {{ total_training_minutes }} minute{{ total_training_minutes|pluralize }} {% if total_training_seconds != 0 %} and {{ total_training_seconds }} seconds{{ total_training_seconds|pluralize }}{% endif %} to finish the training phase.  After this, the game will automatically stop and will move to the contest phase.</p>
+        <p>After each game, you will be able to compare your solution and the best solution, as well as your score.</p>
+        <p>When you are finished with the training phase, you will enter the <strong>waiting page</strong> until everyone is finished before moving to the contest phase.</p>
+        <p>Feel free to refer to the experimental instructions at any time during the experiment.</p>
+        <p>We encourage you to earn as much cash as you can. Are there any questions?</p>
+        <p>Click the "Let's start..." button to start the first training game.</p>
+    </div>
+    <div class="row" style="margin-bottom:40px; margin-top:40px; ">
+      <div class="col-xs-5 ">
+      </div>
+      <div class="col-xs-2 ">
+        <a id="StartBtn" href="{% url 'knapsack:training' %}" class="btn btn-lg btn-success">Let's Start...</a>
+      </div>
+      <div class="col-xs-5 ">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+    });
+
+  </script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Welcome to the Knapsack Contest!{% endblock %}
+
+{% block headertitle %}Introduction{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <h1 class="WelcomeTitle"><img src="{% static 'knapsack/media/mochila_Orange.svg' %}" alt="Knapsack Game Logo" width="70px" height="70px" style="max-width:100px; margin-top: -25px;">Knapsack Game!</h1>
+    <div style="margin-top:40px;">
+        <p>Welcome! This experiment includes two phases:</p>
+        <ol>
+          <li><strong>Game phase</strong>: You will play {{ training_number }} different Knapsack games.</li>
+          <li><strong>Survey phase</strong>: you will fill out a short survey.</li>
+        </ol>
+        <p><i>You will get paid after completing both phases.</i></p>
+        <h3>How to play:</h3>
+        <p>Imagine you are going on a trip and have only one suitcase.  You cannot pack all the things you would like to take with you, so you try to pack the most important things that will fit in the suitcase.  This is the Knapsack game.  In the game, you have a knapsack with limited weight capacity.  There are a number of items available and each item has a weight and a value.  You cannot fit all items in the knapsack because their total weight is more than the maximum weight capacity of the knapsack, and so your task is to find a subset of items of maximum total value that will fit in the knapsack.</p>
+        <p>The items, along with their dollar values and weights, are displayed on top of the page.  Clicking on an item adds it to the knapsack (if it fits).  Clicking on an item in the knapsack removes it and returns it back to the pool of available items not in the knapsack. You can add and remove items as many times as you like before you submit your solution.</p>
+        <h3>Payment:</h3>
+        <p>When you believe that you have found the best solution for a game, click on the "Submit" button to submit your answer and go on to the next game. You will play two types of games: <i>easy</i> and <i>hard</i>.</p>
+        <ul>
+        <li>Your score in an <i><b>easy</b></i> game is a number between <b>0</b> and <b>1</b>, with a score of <b>1</b> indicating you have indeed found the best solution.</li>
+        <li>Your score in a <i><b>hard</b></i> game is a number between <b>0</b> and <b>2</b>, with a score of <b>2</b> indicating you have indeed found the best solution.</li>
+        </ul>
+        <p>After each game, you will see a screen that shows your solution and the best solution side by side, as well as your score. Your score indicates the amount you will be paid for this game. You will get the maximum payment per game if you have found the optimal solution.</p>
+        <p>Click the "Let's start..." button to start the games.</p>
+    </div>
+    <div class="row" style="margin-bottom:40px; margin-top:40px; ">
+      <div class="col-xs-5 ">
+      </div>
+      <div class="col-xs-2 ">
+        <a id="StartBtn" href="{% url 'knapsack:training' %}" class="btn btn-lg btn-success">Let's Start...</a>
+      </div>
+      <div class="col-xs-5 ">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+    });
+
+  </script>
+{% endblock %}

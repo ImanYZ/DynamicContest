@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack {% if total_training_score %}training{% else %}contest{% endif %}!{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <h1 class="WelcomeTitle"><img src="{% static 'knapsack/media/mochila_Orange.svg' %}" alt="Knapsack Game Logo" width="70px" height="70px" style="max-width:100px; margin-top: -25px;">Knapsack Game!</h1>
+    <div style="margin-top:40px;">
+       <div id="PleaseWaitDIV" style="{% if otherPlayersNumWanted < 1 %}display:none;{% endif %}">
+          <p>Please wait! There 
+          <span id="PleaseWaitVerbSpan">
+          {% if otherPlayersNumWanted == 1 %}
+            is
+          {% else %}
+            are
+          {% endif %}
+          </span>
+            still 
+          <span id="PleaseWaitOtherPlayersSpan">
+          {% if otherPlayersNumWanted == 1 %}
+            another
+          {% else %}
+            {{ otherPlayersNumWanted }} other
+          {% endif %}
+            player{{ otherPlayersNumWanted|pluralize }}
+          </span>
+            playing the previous game.</p>
+      </div>
+      <div id="AutomaticallyRedirectDIV" style="{% if otherPlayersNumWanted < 1 %}display:none;{% endif %}">
+        <p>You'll be automatically redirected to the game as soon as the other player{{ otherPlayersNumWanted|pluralize }} finish{% if otherPlayersNumWanted == 1 %}es{% endif %} playing their previous games.</p>
+      </div>
+      <div id="RedirectedDIV" style="{% if otherPlayersNumWanted != 0 %}display:none;{% endif %}">
+        <p>
+          You've already been matched with
+          {% if player_number == 1 %}
+            another
+          {% else %}
+            {{ player_number }} other
+          {% endif %}
+           player{{ player_number|pluralize }}. Please do not refresh or leave the page. The contest will start as soon as the timer is up.
+        </p>
+        <h2 style="text-align: center;">
+          Time left to begin the contest: 
+          <span id="clockdiv" title="Time left to begin the contest." style="color:red">
+            <span class="minutes"></span>:<span class="seconds"></span>
+          </span>
+        </h2>
+      </div>
+      <br>
+      <p>In this contest, you'll compete with
+      {% if player_number == 1 %}
+        another
+      {% else %}
+        {{ player_number }} other
+      {% endif %}
+      player{{ player_number|pluralize }} of similar skill. The contest consists of 
+      {{ game_number }} sequential game{{ game_number|pluralize }}.
+      Each game is finished if you can fit the target value (or higher) into the knapsack. 
+      {% if game_number > 2 %}
+        <strong>You cannot play each game in a contest unless you finish the previous games in the contest.</strong>
+        The player who finishes Game {{ game_number }} of the contest first wins a prize of ${{ contest_earning }}.</p>
+      {% else %}
+        {% if game_number == 2 %}
+          <strong>You cannot play Game 2 unless you finish Game 1.</strong>
+          The player who finishes Game {{ game_number }} first wins a prize of ${{ contest_earning }}.</p>
+        {% endif %}
+      {% endif %}
+      <div id="infeasibilityDIV" class="alert alert-warning" style="{% if not infeasiblility20Percent and not infeasiblility40Percent %}display:none;{% endif %}">
+        <h3>Uncertainty:</h3>
+        <p>Game 1 in the contest can either be feasible or not. A feasible game means that a subset of items with the desired target value that fits into the knapsack always exists. An infeasible game means that such a subset does not exist. <strong>
+      {% if game_number > 2 %}
+          Other than Game 1, the rest of the games in each contest are
+      {% else %}
+          {% if game_number == 2 %}
+              Game 2 is
+          {% endif %}
+      {% endif %}
+          always feasible.</strong> This means that if you have finished the first game, you can go on to try and finish the second game 
+      {% if game_number > 2 %}
+          all the way to Game {{ game_number }}
+      {% endif %}
+        and win the prize. Naturally, the contest cannot be completed (and no one can win a prize) if the first game is infeasible. You will not be told whether the first game is feasible or not. Instead, before you start the contest, you will be told that the chance the first game is feasible is either a 100% (definitely feasible), 80%, or 60%.</p>
+        <p>For the next contest, the chance that the first game is feasible is <span id="infeasiblilityPercentSpan1">{% if infeasiblility40Percent %}60{% else %}{% if infeasiblility20Percent %}80{% else %}100{% endif %}{% endif %}</span>%.</p>
+        <p><strong>The Quit Option: </strong>At any point in the contest, unless your opponent wins the contest, you will have an option to quit by pressing the "Quit" button.  If you press the button, you will be presented with a feasible knapsack game that you can try to solve (with no competition). If you finish it, you will get paid ${{ training_contest_earning }}, similar to the training phase.</p>
+        <p><strong>Note! If the other player wins, the contest will be over and you will not have the chance to quit and play the feasible game.</strong></p>
+      </div>
+      <div id="no_informationDIV" class="alert alert-warning" style="{% if not no_information %}display:none;{% endif %}">
+        <p>You will not learn anything about how your opponent is doing unless they finish the whole contest and win.</p>
+      </div>
+      <div id="intermediate_informationDIV" class="alert alert-warning" style="{% if not intermediate_information %}display:none;{% endif %}">
+        <p><span id="game_minutes_to_revealDIV">
+            {{ game_minutes_to_reveal }} minute{{ game_minutes_to_reveal|pluralize }}
+          </span> 
+          <span id="game_seconds_to_revealDIV" style="{% if game_seconds_to_reveal < 1 %}display:none;{% endif %}">
+            and {{ game_seconds_to_reveal }} second{{ game_seconds_to_reveal|pluralize }}</span>
+          after the beginning of the first game, you'll learn if your opponent has won, quit, or is still playing the first game.
+        </p>
+      </div>
+      <div id="complete_informationDIV" class="alert alert-warning" style="{% if not complete_information %}display:none;{% endif %}">
+        <p>You will be immediately notified if your opponent manages to finish Game 1 or if they quit, i.e. if you do not receive a notification then this means that your opponent is still trying to solve Game 1.</p>
+      </div>
+      <div id="FeasibilityImage" style="{% if infeasiblility20Percent or infeasiblility40Percent %}display:none;{% endif %}">
+          <img src="{% static 'knapsack/media/Contest Progress Diagram.png' %}" width="700px" class="img-responsive center-block" alt="Contest Progress Diagram">
+      </div>
+      <div id="infeasibility20Image" style="{% if not infeasiblility20Percent %}display:none;{% endif %}">
+          <img src="{% static 'knapsack/media/Contest Progress Diagram 20% Infeasibility.png' %}" width="700px" class="img-responsive center-block" alt="Contest Progress Diagram">
+      </div>
+      <div id="infeasibility40Image" style="{% if not infeasiblility40Percent %}display:none;{% endif %}">
+          <img src="{% static 'knapsack/media/Contest Progress Diagram 40% Infeasibility.png' %}" width="700px" class="img-responsive center-block" alt="Contest Progress Diagram">
+      </div>
+<!--         <p>You'll have a limited amount of time to complete the game. When the time is over, you will automatically go to the next game. If you found your desired solution earlier, you can click the "Submit" button to continue.</p> -->
+<!--      <p>Whenever you find your desired solution, you can click the "Submit" button to continue.</p> -->
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//again because google chrome don't insert first hash into history
+    window.onhashchange=function(){window.location.hash="no-back-button";}
+
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+      {% if otherPlayersNumWanted != 0 %}
+        var noActiveConnection = true;
+        var reloadInterval = setInterval ( function() {
+          if (noActiveConnection) {
+            noActiveConnection = false;
+            $.post( "{% url 'knapsack:waitingroom' %}",
+              function (data) {
+                noActiveConnection = true;
+                if (data.phase == 'contest') {
+                  window.location.href = "{% url 'knapsack:waitingroom' %}";
+                }
+                else if (data.otherPlayersNumWanted != 0) {
+                  $("#PleaseWaitDIV").show();
+                  $("#AutomaticallyRedirectDIV").show();
+                  $("#RedirectedDIV").hide();
+                  if (data.otherPlayersNumWanted == 1) {
+                    $("#PleaseWaitVerbSpan").html("is");
+                    $("#PleaseWaitOtherPlayersSpan").html("another player");
+                    $("#AutomaticallyRedirectDIV").children("p").html("You'll be automatically redirected to the game as soon as the other player finishes playing their previous games.");
+                  }
+                  else {
+                    $("#PleaseWaitVerbSpan").html("are");
+                    $("#PleaseWaitOtherPlayersSpan").html("other players");
+                    $("#AutomaticallyRedirectDIV").children("p").html("You'll be automatically redirected to the game as soon as the other players finish playing their previous games.");
+                  }
+                }
+                else {
+                  clearInterval(reloadInterval);
+                  $("#PleaseWaitDIV").hide();
+                  $("#AutomaticallyRedirectDIV").hide();
+                  $("#RedirectedDIV").show();
+        {% if contestIndex == 1 %}
+                  var deadline = new Date(Date.parse(new Date()) + 1 * 2 * 1 * 60 * 1000);
+        {% else %}
+                  var deadline = new Date(Date.parse(new Date()) + 1 * 1 * 1 * 60 * 1000);
+        {% endif %}
+                  initializeClock('clockdiv', deadline);
+                }
+                if (data.infeasiblility20Percent) {
+                  $("#infeasibilityDIV").show();
+                  $("#infeasiblilityPercentSpan1").html("80");
+                  $("#infeasiblilityPercentSpan11").html("20");
+                  $("#infeasiblilityPercentSpan2").html("80");
+                  $("#infeasiblilityPercentSpan21").html("20");
+                  $("#FeasibilityImage").hide();
+                  $("#infeasibility20Image").show();
+                  $("#infeasibility40Image").hide();
+                }
+                else if (data.infeasiblility40Percent) {
+                  $("#infeasibilityDIV").show();
+                  $("#infeasiblilityPercentSpan1").html("60");
+                  $("#infeasiblilityPercentSpan11").html("40");
+                  $("#infeasiblilityPercentSpan2").html("60");
+                  $("#infeasiblilityPercentSpan21").html("40");
+                  $("#FeasibilityImage").hide();
+                  $("#infeasibility20Image").hide();
+                  $("#infeasibility40Image").show();
+                }
+                else if (data.otherPlayersNumWanted == 0) {
+                  $("#infeasibilityDIV").show();
+                  $("#infeasiblilityPercentSpan1").html("100");
+                  $("#infeasiblilityPercentSpan11").html("0");
+                  $("#infeasiblilityPercentSpan2").html("100");
+                  $("#infeasiblilityPercentSpan21").html("0");
+                  $("#FeasibilityImage").show();
+                  $("#infeasibility20Image").hide();
+                  $("#infeasibility40Image").hide();
+                }
+                else {
+                  $("#infeasibilityDIV").hide();
+                  $("#FeasibilityImage").show();
+                  $("#infeasibility20Image").hide();
+                  $("#infeasibility40Image").hide();
+                }
+                if (data.no_information) {
+                  $("#no_informationDIV").show();
+                }
+                else {
+                  $("#no_informationDIV").hide();
+                }
+                if (data.intermediate_information) {
+                  $("#intermediate_informationDIV").show();
+                }
+                else {
+                  $("#intermediate_informationDIV").hide();
+                }
+                if (data.complete_information) {
+                  $("#complete_informationDIV").show();
+                }
+                else {
+                  $("#complete_informationDIV").hide();
+                }
+                if (data.game_minutes_to_reveal) {
+                  if (data.game_minutes_to_reveal != 1) {
+                    $("#game_minutes_to_revealDIV").html(data.game_minutes_to_reveal + " minutes");
+                  }
+                  else {
+                    $("#game_minutes_to_revealDIV").html("1 minute");
+                  }
+                }
+                if (data.game_seconds_to_reveal) {
+                  if (data.game_seconds_to_reveal != 1) {
+                    $("#game_seconds_to_revealDIV").html(data.game_seconds_to_reveal + " seconds");
+                  }
+                  else {
+                    $("#game_seconds_to_revealDIV").html("1 second");
+                  }
+                }
+              }, "json")
+              .fail ( function (request, status, error) {
+                alert( "Here! An error occurred. Please try again! If it happened again, please contact oneweb@umich.edu with details about the error and what you see on the webpage. request: " + request.responseText + ", request.responseText.d: " + request.responseText.d + ", status: " + status + ", error: " + error );
+              });
+          }
+        }, 1000);
+      {% else %}
+        var deadline = new Date(Date.parse(new Date()) + 1 * 1 * 1 * 60 * 1000);
+        initializeClock('clockdiv', deadline);
+      {% endif %}
+
+      // function CountDownGenerator(){
+      //   // Game timer setup.
+      //   var ts = new Date(2012, 0, 1),
+      //     newYear = true;
+
+      //   if((new Date()) > ts) {
+      //     // The new year is here! Count towards something else.
+      //     // Notice the *1000 at the end - time must be in milliseconds
+      //     ts = (new Date()).getTime() + 1 * 60 * 1000;
+      //     newYear = false;
+      //   }
+
+      //   $('#countdown').countdown({
+      //     timestamp: ts,
+      //   });
+      // }
+    });
+
+    function getTimeRemaining(endtime) {
+      var t = Date.parse(endtime) - Date.parse(new Date());
+      var seconds = Math.floor((t / 1000) % 60);
+      var minutes = Math.floor((t / 1000 / 60) % 60);
+      // var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+      // var days = Math.floor(t / (1000 * 60 * 60 * 24));
+      return {
+        'total': t,
+        // 'days': days,
+        // 'hours': hours,
+        'minutes': minutes,
+        'seconds': seconds
+      };
+    }
+
+    function initializeClock(id, endtime) {
+      var clock = document.getElementById(id);
+      // var daysSpan = clock.querySelector('.days');
+      // var hoursSpan = clock.querySelector('.hours');
+      var minutesSpan = clock.querySelector('.minutes');
+      var secondsSpan = clock.querySelector('.seconds');
+
+      function updateClock() {
+        var t = getTimeRemaining(endtime);
+
+        // daysSpan.innerHTML = t.days;
+        // hoursSpan.innerHTML = ('0' + t.hours).slice(-2);
+        minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
+        secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
+
+        if (t.total <= 0) {
+          clearInterval(timeinterval);
+          window.location.href = "{% url 'knapsack:game' %}";
+        }
+      }
+
+      updateClock();
+      var timeinterval = setInterval(updateClock, 1000);
+    }
+
+
+
+
+    // function CountDownInitializer(){
+    //   // Number of seconds in every time division
+    //   var days  = 24*60*60,
+    //     hours = 60*60,
+    //     minutes = 60,
+    //     timeIsUp = false;
+      
+    //   // Creating the plugin
+    //   $.fn.countdown = function(prop){
+        
+    //     var options = $.extend({
+    //       callback  : function(){},
+    //       timestamp : 0
+    //     },prop);
+        
+    //     var left, d, h, m, s, positions;
+
+    //     // Initialize the plugin
+    //     init(this, options);
+        
+    //     positions = this.find('.position');
+        
+    //     (function tick(){
+          
+    //       // Time left
+    //       left = Math.floor((options.timestamp - (new Date())) / 1000);
+          
+    //       if(left < 0){
+    //         left = 0;
+    //       }
+          
+    //       // Number of days left
+    //       d = Math.floor(left / days);
+    //       updateDuo(0, 1, d);
+    //       left -= d*days;
+          
+    //       // Number of hours left
+    //       h = Math.floor(left / hours);
+    //       updateDuo(2, 3, h);
+    //       left -= h*hours;
+          
+    //       // Number of minutes left
+    //       m = Math.floor(left / minutes);
+    //       updateDuo(4, 5, m);
+    //       left -= m*minutes;
+          
+    //       // Number of seconds left
+    //       s = left;
+    //       if (m == 0 && s == 0) {
+    //         timeIsUp = true;
+    //         window.location.href = "{% url 'knapsack:game' %}";
+    //       }
+    //       else {
+    //         updateDuo(6, 7, s);
+            
+    //         // Calling an optional user supplied callback
+    //         options.callback(d, h, m, s);
+            
+    //         // Scheduling another call of this function in 1s
+    //         setTimeout(tick, 1000);
+    //       }
+    //     })();
+        
+    //     // This function updates two digit positions at once
+    //     function updateDuo(minor,major,value){
+    //       switchDigit(positions.eq(minor),Math.floor(value/10)%10);
+    //       switchDigit(positions.eq(major),value%10);
+    //     }
+        
+    //     return this;
+    //   };
+
+
+    //   function init(elem, options){
+    //     elem.addClass('countdownHolderWaiting');
+
+    //     // Creating the markup inside the container
+    //     $.each(['Days','Hours','Minutes','Seconds'],function(i){
+    //       $('<span class="count'+this+'">').html(
+    //         '<span class="position">\
+    //           <span class="digit static">0</span>\
+    //         </span>\
+    //         <span class="position">\
+    //           <span class="digit static">0</span>\
+    //         </span>'
+    //       ).appendTo(elem);
+          
+    //       if(this!="Seconds"){
+    //         elem.append('<span class="countDiv countDiv'+i+'"></span>');
+    //       }
+    //     });
+
+    //   }
+
+    //   // Creates an animated transition between the two numbers
+    //   function switchDigit(position,number){
+        
+    //     var digit = position.find('.digit')
+        
+    //     if(digit.is(':animated')){
+    //       return false;
+    //     }
+        
+    //     if(position.data('digit') == number){
+    //       // We are already showing this number
+    //       return false;
+    //     }
+        
+    //     position.data('digit', number);
+        
+    //     var replacement = $('<span>',{
+    //       'class':'digit',
+    //       css:{
+    //         top:'-2.1em',
+    //         opacity:0
+    //       },
+    //       html:number
+    //     });
+        
+    //     // The .static class is added when the animation
+    //     // completes. This makes it run smoother.
+        
+    //     digit
+    //       .before(replacement)
+    //       .removeClass('static')
+    //       .animate({top:'2.5em',opacity:0},'fast',function(){
+    //         digit.remove();
+    //       })
+
+    //     replacement
+    //       .delay(100)
+    //       .animate({top:0,opacity:1},'fast',function(){
+    //         replacement.addClass('static');
+    //       });
+    //   }
+    // }
+  </script>
+{% endblock %}
