@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% load humanize %}
+
+{% block title %}Knapsack Quit Questions{% endblock %}
+
+{% block headertitle %}Knapsack Quit Questions{% endblock %}
+
+{% block blockcontent %}
+  <div class="transBackground">
+    <p style="margin-top:40px;" class="questionP">Tell us why you quit:</p>
+    <p class="questionP">Do you think this game was feasible? If your guess is correct, you will earn an extra ${{ quit_question_earning }}.</p>
+    <div id="WasFeasibleYesDIV" class="radio lb-lg label {% if WasFeasibleYes %}disabled {% if WasFeasibleYes == 1 or WasFeasibleYes == 2 %}label-success{% else %}{% if WasFeasibleYes == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" id="WasFeasibleYes" name="WasFeasible" value="Yes" {% if WasFeasibleYes %}disabled {% if WasFeasibleYes == 2 or WasFeasibleYes == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      Yes
+    </div>
+    <br><br>
+    <div id="WasFeasibleNoDIV" class="radio lb-lg label {% if WasFeasibleNo %}disabled {% if WasFeasibleNo == 1 or WasFeasibleNo == 2 %}label-success{% else %}{% if WasFeasibleNo == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" id="WasFeasibleNo" name="WasFeasible" value="No" {% if WasFeasibleNo %}disabled {% if WasFeasibleNo == 2 or WasFeasibleNo == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      No
+    </div>
+    <br><br>
+    <div id="WasFeasibleNotSureDIV" class="radio lb-lg label {% if WasFeasibleNotSure %}disabled {% if WasFeasibleNotSure == 1 or WasFeasibleNotSure == 2 %}label-success{% else %}{% if WasFeasibleNotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
+      <label><input type="radio" id="WasFeasibleNotSure" name="WasFeasible" value="NotSure" {% if WasFeasibleNotSure %}disabled {% if WasFeasibleNotSure == 2 or WasFeasibleNotSure == -2 %} checked="checked"{% endif %}{% endif %}></label>
+      I am not sure.
+    </div>
+    <br><br>
+    <div id="SameOpponentError" class="alert alert-danger" style="display: none;">
+      <strong>Required!</strong> Please make a choice.
+    </div>
+    <br><br>
+    <div class="row" style="margin-bottom:40px;">
+      <div class="col-xs-4 ">
+      </div>
+      <div class="col-xs-4 ">
+        {% if phase and phase == 'quiz' %}
+            <a id="WasFeasibleContinue" href="{% url 'knapsack:training' %}?userGameId={{ userGameId }}" class="btn btn-lg btn-success">Continue</a>
+        {% else %}
+            <button id="SubmitBtn" type="submit" class="btn btn-lg btn-success">Submit</button>
+        {% endif %}
+      </div>
+      <div class="col-xs-4 ">
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scontent %}
+  <!-- JavaScript code for this project -->
+  <script>
+    window.location.hash="no-back-button";
+    window.location.hash="Again-No-back-button";//again because google chrome don't insert first hash into history
+    window.onhashchange=function(){window.location.hash="no-back-button";}
+
+    $(document).ready(function(){
+
+      function getCookie(name) {
+          var cookieValue = null;
+          if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                  var cookie = jQuery.trim(cookies[i]);
+                  // Does this cookie string begin with the name we want?
+                  if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      var csrftoken = getCookie('csrftoken');
+
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+
+      $('.number-only').keypress(function(e) {
+        if(isNaN(this.value+""+String.fromCharCode(e.charCode))) return false;
+      })
+      .on("cut copy paste",function(e){
+        e.preventDefault();
+      });
+       
+        $( "#SubmitBtn" ).click(function( event ) {
+            var errorInPage = false;
+
+            var WhyQuit = $('#WhyQuit').val();
+            var WasFeasible = $('input[name=WasFeasible]:checked').val();
+            var feasible = 0;
+            var infeasible = 0;
+            var notSure = 0;
+            if (WasFeasible == "Yes") {
+                feasible = 1;
+                $("#WasFeasibleError").hide();
+            }
+            else if (WasFeasible == "No") {
+                infeasible = 1;
+                $("#WasFeasibleError").hide();
+            }
+            else if (WasFeasible == "NotSure") {
+                notSure = 1;
+                $("#WasFeasibleError").hide();
+            }
+            else {
+                $("#WasFeasibleError").show();
+                errorInPage = true;
+            }
+            if (!errorInPage) {
+                window.location.href = ("{% url 'knapsack:quitquestion' %}?WhyQuit=" + WhyQuit +
+                    '&feasible=' + feasible + '&infeasible=' + infeasible +
+                    '&notSure=' + notSure);
+            }
+        });
+    });
+  </script>
+{% endblock %}
