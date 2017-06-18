@@ -168,7 +168,7 @@ def difficultyCalculator(gameType):
                                                         itemsNum = 12
         gameType.difficulty = math.log(gameType.capacity, 2) * itemsNum
         gameType.save()
-        return  gameType.difficulty
+        return gameType.difficulty
     return gameType.difficulty
 
 
@@ -896,15 +896,26 @@ def waitingroom(request):
                             userInExperiment.save()
                     # print("usersInExperiment: " + str(usersInExperiment))
 
-                # Creating partitions of sets such that each partition is the same length.
-                # E.g., equipart({1,2,3,4}, 2)
-                # [({1, 2}, {3, 4}), ({1, 3}, {2, 4}), ({1, 4}, {2, 3})]
-                playersPartitions = list(list(equipart(set(usersInExperiment), player_number))[currentContestIndex - 1])
-                # print("playersPartitions: " + str(playersPartitions))
-                usersInExperiment = []
-                for playersPartition in playersPartitions:
-                    for playerPartition in playersPartition:
-                        usersInExperiment.append(playerPartition)
+                    usersInExperimentTotal = []
+                    for groupIndex in range(1,5):
+                        usersInExperimentGroup = usersInExperiment.filter(group=groupIndex)
+                        playersPartitions = list(list(equipart(set(usersInExperimentGroup), player_number))[currentContestIndex - 1])
+                        # print("playersPartitions: " + str(playersPartitions))
+                        for playersPartition in playersPartitions:
+                            for playerPartition in playersPartition:
+                                usersInExperimentTotal.append(playerPartition)
+                    usersInExperiment = usersInExperimentTotal
+
+                else:
+                    # Creating partitions of sets such that each partition is the same length.
+                    # E.g., equipart({1,2,3,4}, 2)
+                    # [({1, 2}, {3, 4}), ({1, 3}, {2, 4}), ({1, 4}, {2, 3})]
+                    playersPartitions = list(list(equipart(set(usersInExperiment), player_number))[currentContestIndex - 1])
+                    # print("playersPartitions: " + str(playersPartitions))
+                    usersInExperiment = []
+                    for playersPartition in playersPartitions:
+                        for playerPartition in playersPartition:
+                            usersInExperiment.append(playerPartition)
 
                 if notGroupedYet is True:
                     experiment.initializing = True

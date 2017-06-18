@@ -11,16 +11,16 @@
 {% block blockcontent %}
   <div class="transBackground">
     <p style="margin-top:40px;" class="questionP">Tell us why you quit:</p>
-    <textarea class="form-control" rows="5" id="WhyQuit">{{ why_quit }}</textarea>
+    <textarea class="form-control" rows="5" id="WhyQuit" {% if WasFeasibleYes %}disabled{% endif %}>{{ why_quit }}</textarea>
     <p class="questionP">Do you think this game was feasible? If your guess is correct, you will earn an extra ${{ quit_question_earning }}.</p>
     <div id="WasFeasibleYesDIV" class="radio lb-lg label {% if WasFeasibleYes %}disabled {% if WasFeasibleYes == 1 or WasFeasibleYes == 2 %}label-success{% else %}{% if WasFeasibleYes == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
       <label><input type="radio" id="WasFeasibleYes" name="WasFeasible" value="Yes" {% if WasFeasibleYes %}disabled {% if WasFeasibleYes == 2 or WasFeasibleYes == -2 %} checked="checked"{% endif %}{% endif %}></label>
-      Yes
+      It was feasible.
     </div>
     <br><br>
     <div id="WasFeasibleNoDIV" class="radio lb-lg label {% if WasFeasibleNo %}disabled {% if WasFeasibleNo == 1 or WasFeasibleNo == 2 %}label-success{% else %}{% if WasFeasibleNo == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
       <label><input type="radio" id="WasFeasibleNo" name="WasFeasible" value="No" {% if WasFeasibleNo %}disabled {% if WasFeasibleNo == 2 or WasFeasibleNo == -2 %} checked="checked"{% endif %}{% endif %}></label>
-      No
+      It was not feasible.
     </div>
     <br><br>
     <div id="WasFeasibleNotSureDIV" class="radio lb-lg label {% if WasFeasibleNotSure %}disabled {% if WasFeasibleNotSure == 1 or WasFeasibleNotSure == 2 %}label-success{% else %}{% if WasFeasibleNotSure == -2 %}label-danger{% else %}label-default{% endif %}{% endif %}{% else %}label-info{% endif %}">
@@ -28,7 +28,7 @@
       I am not sure.
     </div>
     <br><br>
-    <div id="SameOpponentError" class="alert alert-danger" style="display: none;">
+    <div id="WasFeasibleError" class="alert alert-danger" style="display: none;">
       <strong>Required!</strong> Please make a choice.
     </div>
     <br><br>
