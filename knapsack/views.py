@@ -36,7 +36,7 @@ def login(request):
             if request.method == 'POST' and 'experiment' in request.POST:
                 current_experiment = request.POST['experiment']
             else:
-                current_experiment = 3
+                current_experiment = 4
             experiment = Experiment.objects.get(vesion=current_experiment)
             user = User.objects.filter(username=username)
             if len(user) != 0:
@@ -70,7 +70,7 @@ def index(request):
         if request.method == 'POST' and 'experiment' in request.POST:
             current_experiment = request.POST['experiment']
         else:
-            current_experiment = 3
+            current_experiment = 4
         username = request.session['username']
         experiment = Experiment.objects.get(vesion=current_experiment)
         user, created = User.objects.get_or_create(username=username, experiment=experiment)
@@ -377,7 +377,8 @@ def training(request):
                     total_difficulty += userTraining.game.difficulty
             # if userGamesNum == 0:
             #     user.skill = user.skill / total_difficulty
-            user.total_training_score = math.ceil(user.total_training_score)
+            user.total_training_score = round(user.total_training_score, 2)
+            user.total_earning = math.ceil(user.total_training_score + 5)
             user.save()
             contest_number = user.experiment.contest_number
             game_number = user.experiment.game_number
@@ -387,8 +388,8 @@ def training(request):
             game_minutes_to_reveal = user.experiment.game_minutes_to_reveal
             game_seconds_to_reveal = user.experiment.game_seconds_to_reveal
 
-            context = {'username': username, 'total_training_score': round(user.total_training_score, 2),
-                       'total_earning': math.ceil(user.total_training_score + 5),
+            context = {'username': username, 'total_training_score': user.total_training_score,
+                       'total_earning': user.total_earning,
                        'contestsNum': contest_number, 'game_number': game_number,
                        'player_number': player_number - 1, 'game_max_minutes': game_max_minutes,
                        'game_max_seconds': game_max_seconds, 'game_minutes_to_reveal': game_minutes_to_reveal,
@@ -398,8 +399,10 @@ def training(request):
                 context['quit_question_earning'] = round(user.quit_question_earning, 2)
                 context['total_game_score'] = round(user.total_game_score, 2)
                 context['contest_score'] = contestusergameObj.score
-                context['total_earning'] = math.ceil(user.total_training_score + user.quizscore + user.total_game_score
+                user.total_earning = math.ceil(user.total_training_score + user.quizscore + user.total_game_score
                                                      + user.quit_question_earning + 5)
+                user.save()
+                context['total_earning'] = user.total_earning
                 context['phase'] = 'game'
                 if contestObj.index == user.experiment.contest_number:
                     context['phase'] = 'contest'
@@ -694,6 +697,7 @@ def quizsubmit(request):
                 Feasible60Target40 = -2
             elif user.Feasible60NotSure:
                 Feasible60NotSure = -2
+            user.total_earning = math.ceil(user.quizscore + user.total_training_score + 5)
             user.save()
 
             context = {'username': username, 'phase': 'quiz',
@@ -727,7 +731,7 @@ def quizresults(request):
             context = {'username': username, 'phase': 'quiz', 'quiz_score': round(user.quizscore, 2),
                        'total_game_score': round(user.total_game_score, 2),
                        'total_training_score': round(user.total_training_score, 2),
-                       'total_earning': math.ceil(user.quizscore + user.total_training_score + 5)}
+                       'total_earning': user.total_earning}
             return render(request, 'knapsack/results.html', context)
     context = {'username': ''}
     return render(request, 'knapsack/index.html', context)
@@ -1127,13 +1131,14 @@ def waitingroom(request):
             for userContestGame in userContestGames:
                 user.total_game_score += userContestGame.score
             user.total_game_score = round(user.total_game_score / 2)
+            user.total_earning = math.ceil(user.total_game_score + user.quizscore + user.total_training_score + 5)
             user.save()
             experiment.initializing = False
             experiment.save()
             context = {'username': username, 'phase': 'contest', 'quiz_score': round(user.quizscore, 2),
                        'total_game_score': round(user.total_game_score, 2),
                        'total_training_score': round(user.total_training_score, 2),
-                       'total_earning': math.ceil(user.total_game_score + user.quizscore + user.total_training_score + 5)}
+                       'total_earning': user.total_earning}
             if request.method == 'GET':
                 return render(request, 'knapsack/results.html', context)
             if request.method == 'POST':
@@ -1200,7 +1205,7 @@ def game(request):
         contestSecondsPast = int((timezone.now() - userGames[0].started).total_seconds())
         remainingSecondsToReveal = (userGames[0].game.minutes_to_reveal * 60 +
                                     userGames[0].game.seconds_to_reveal - contestSecondsPast)
-        if remainingSecondsToReveal < 0:
+        if remainingSecondsToReveal <= 0:
             minutes_to_reveal = 0
             seconds_to_reveal = 0
         else:
@@ -1238,7 +1243,7 @@ def game(request):
                         inBag[item.item_index] = True
                     elif item.from_knapsack:
                         inBag[item.item_index] = False
-                # print ("opponentsScores: " + str(opponentsScores))
+                print ("seconds_to_reveal: " + str(seconds_to_reveal))
                 context = {'username': username, 'capacity': userGame.game.capacity,
                            'value_0': userGame.game.value_0, 'weight_0': userGame.game.weight_0,
                            'inBag_0': inBag[0],
@@ -1396,6 +1401,8 @@ def game(request):
             for userContestGame in userContestGames:
                 user.total_game_score += userContestGame.score
             user.total_game_score = math.ceil(user.total_game_score / 2)
+            user.total_earning = math.ceil(user.total_game_score + user.quizscore + user.total_training_score +
+                                                  user.quit_question_earning + 5)
             user.save()
 
             context = {'username': username, 'phase': 'game', 'quiz_score': round(user.quizscore, 2),
@@ -1403,8 +1410,7 @@ def game(request):
                        'contestIndex': currentContestIndex, 'contestsNum': user.experiment.contest_number,
                        'total_game_score': round(user.total_game_score, 2),
                        'total_training_score': round(user.total_training_score, 2),
-                       'total_earning': math.ceil(user.total_game_score + user.quizscore + user.total_training_score +
-                                                  user.quit_question_earning + 5)}
+                       'total_earning': user.total_earning}
             if user.experiment.contest_number == currentContestIndex:
                 context['phase'] = 'contest'
             return render(request, 'knapsack/results.html', context)
@@ -1569,6 +1575,7 @@ def quitquestion(request):
         if request.session.get('username', False):
             username = request.session['username']
             user = User.objects.get(username=username)
+            quit_question_earning = user.experiment.quit_question_earning
             usergame = Usergame.objects.get(pk=request.GET['userGameId'])
             infeasibility = usergame.game.infeasible
             correct = False
@@ -1611,7 +1618,7 @@ def quitquestion(request):
             context = {'username': username, 'userGameId': request.GET['userGameId'], 'WasFeasibleYes': WasFeasibleYes,
                        'WasFeasibleNo': WasFeasibleNo,
                        'WasFeasibleNotSure': WasFeasibleNotSure, 'why_quit': request.GET['WhyQuit'],
-                       'phase': 'quitquestion'}
+                       'phase': 'quitquestion', 'quit_question_earning': quit_question_earning}
             return render(request, 'knapsack/QuitQuestions.html', context)
     context = {'username': ''}
     return render(request, 'knapsack/training.html', context)
@@ -1710,14 +1717,15 @@ def surveysubmit(request):
             user.changeopinion = changeopinion
             user.strategies = strategies
             user.finished_study = timezone.now()
+            user.total_earning = math.ceil(user.total_game_score + user.quizscore + user.total_training_score +
+                                                  user.quit_question_earning + 5)
             user.save()
 
             context = {'username': username, 'phase': 'survey', 'quiz_score': round(user.quizscore, 2),
                        'quit_question_earning': round(user.quit_question_earning, 2),
                        'total_game_score': round(user.total_game_score, 2),
                        'total_training_score': round(user.total_training_score, 2),
-                       'total_earning': math.ceil(user.total_game_score + user.quizscore + user.total_training_score +
-                                                  user.quit_question_earning + 5)}
+                       'total_earning': user.total_earning}
             return render(request, 'knapsack/results.html', context)
     context = {'username': ''}
     return render(request, 'knapsack/index.html', context)

@@ -95,8 +95,11 @@
         <p><span id="game_minutes_to_revealDIV">
             {{ game_minutes_to_reveal }} minute{{ game_minutes_to_reveal|pluralize }}
           </span> 
-          <span id="game_seconds_to_revealDIV" style="{% if game_seconds_to_reveal < 1 %}display:none;{% endif %}">
-            and {{ game_seconds_to_reveal }} second{{ game_seconds_to_reveal|pluralize }}</span>
+          {% if game_seconds_to_reveal >= 1 %}
+            <span id="game_seconds_to_revealDIV">
+                and {{ game_seconds_to_reveal }} second{{ game_seconds_to_reveal|pluralize }}
+            </span>
+          {% endif %}
           after the beginning of the first game, you'll learn if your opponent has won, quit, or is still playing the first game.
         </p>
       </div>

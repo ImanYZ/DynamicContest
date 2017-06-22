@@ -112,6 +112,7 @@ class Gametype(models.Model):
 class User(models.Model):
     experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE)
     username = models.CharField(max_length=400)
+    total_earning = models.FloatField(default=0)
     total_training_score = models.FloatField(default=0)
     skill = models.FloatField(default=0)
     group = models.IntegerField(default=0)

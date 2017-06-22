@@ -47,7 +47,8 @@ admin.site.register(Gametype, GametypeAdmin)
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['experiment', 'username', 'total_training_score', 'skill', 'group', 'total_game_score',
+    list_display = ['experiment', 'username', 'total_earning', 'total_training_score', 'total_game_score', 'quizscore',
+                    'quit_question_earning', 'skill', 'group',
                     'waiting_for_game', 'started_training', 'finished_training', 'started_study', 'finished_study',
                     'age', 'male', 'female', 'siblings', 'major', 'undergraduate', 'graduate', 'notstudent',
                     'programyear', 'participatedbefore', 'white', 'asian', 'africanamerican', 'hispanic',
@@ -56,7 +57,7 @@ class UserAdmin(admin.ModelAdmin):
                     'GroupSizeNotSure', 'SameOpponentYes', 'SameOpponentNo', 'SameOpponentNotSure',
                     'InfeasibleIsSolvableTrue', 'InfeasibleIsSolvableFalse', 'InfeasibleIsSolvableNotSure',
                     'SureGameTrue', 'SureGameFalse', 'SureGameNotSure', 'Feasible60Infeasible40', 'Feasible60Target40',
-                    'Feasible60NotSure', 'quizscore', 'quit_question_earning',
+                    'Feasible60NotSure',
                     'created', 'updated']
 
     search_fields = ['experiment__capacity', 'username']
