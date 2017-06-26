@@ -36,7 +36,7 @@ def login(request):
             if request.method == 'POST' and 'experiment' in request.POST:
                 current_experiment = request.POST['experiment']
             else:
-                current_experiment = 4
+                current_experiment = 5
             experiment = Experiment.objects.get(vesion=current_experiment)
             user = User.objects.filter(username=username)
             if len(user) != 0:
@@ -70,7 +70,7 @@ def index(request):
         if request.method == 'POST' and 'experiment' in request.POST:
             current_experiment = request.POST['experiment']
         else:
-            current_experiment = 4
+            current_experiment = 5
         username = request.session['username']
         experiment = Experiment.objects.get(vesion=current_experiment)
         user, created = User.objects.get_or_create(username=username, experiment=experiment)
