@@ -54,7 +54,7 @@
       <div class="col-xs-4 ">
       </div>
       <div class="col-xs-2 ">
-        <a id="StartBtn" href="{% if phase == 'training' %}{% url 'knapsack:contestintro' %}{% else %}{% if phase == 'game' %}{% url 'knapsack:waitingroom' %}{% else %}{% if phase == 'contest' %}{% url 'knapsack:survey' %}{% else %}{% if phase == 'quiz' %}{% url 'knapsack:waitingroom' %}{% else %}{% url 'knapsack:logout' %}{% endif %}{% endif %}{% endif %}{% endif %}" class="btn btn-lg btn-success">{% if phase == 'training' %}Go to the Contest Phase Instructions{% else %}{% if phase == 'game' %}Start the Next Contest{% else %}{% if phase == 'contest' %}Start the Survey{% else %}{% if phase == 'quiz' %}Start the First Contest.{% else %}Logout{% endif %}{% endif %}{% endif %}{% endif %}</a>
+        <a id="StartBtn" href="#" class="btn btn-lg btn-success">{% if phase == 'training' %}Go to the Contest Phase Instructions{% else %}{% if phase == 'game' %}Start the Next Contest{% else %}{% if phase == 'contest' %}Start the Survey{% else %}{% if phase == 'quiz' %}Start the First Contest.{% else %}Logout{% endif %}{% endif %}{% endif %}{% endif %}</a>
       </div>
       <div class="col-xs-6 ">
       </div>
@@ -96,9 +96,13 @@
           }
       });
 
-      $('#StartBtn').one('click', function(){
+      var clicked = false;
+      $('#StartBtn').on('click', function(){
         event.preventDefault();
-        window.location = $('#StartBtn').attr('href');
+        if(clicked === false) {
+           clicked = true;
+           window.location = "{% if phase == 'training' %}{% url 'knapsack:contestintro' %}{% else %}{% if phase == 'game' %}{% url 'knapsack:waitingroom' %}{% else %}{% if phase == 'contest' %}{% url 'knapsack:survey' %}{% else %}{% if phase == 'quiz' %}{% url 'knapsack:waitingroom' %}{% else %}{% url 'knapsack:logout' %}{% endif %}{% endif %}{% endif %}{% endif %}";
+        }
       });
 
     });
