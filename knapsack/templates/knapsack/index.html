@@ -29,9 +29,14 @@
         <p>In the <strong>training phase</strong>, you will be paid ${{ training_earning }} for each game in which you can successfully fit items adding up to the target value (or above) into the knapsack.  If you are unable to reach the target value, you will get nothing. So, a player either succeeds in fitting the target value or does not.</p>
         <p>In the <strong>contest phase</strong>, there is a final prize of ${{ contest_earning }} for each contest.  The player who is able to finish the games first will earn the prize.  The other player will get nothing.  Finishing a game in the contest phase means being able to fit items in the knapsack whose total value is at least equal to the target value.</p>
         <p>After each game, you will be able to compare your solution and the best solution, as well as your score.</p>
-        <p>Click the "Go to Training..." button to start the training phase.</p>
+        <div id="NeedMoreSubjectsDIV" class="alert alert-warning" style="{% if not needMoreSubjects %}display:none;{% endif %}">
+            <p>The experiment requires {{ total_participants_number }} participants to start. Please wait till all participants are present to start the experiment.</p>
+        </div>
+        <div id="StartDescriptionDIV" class="alert alert-warning" style="{% if needMoreSubjects %}display:none;{% endif %}">
+            <p>Click the "Go to Training..." button to start the training phase.</p>
+        </div>
     </div>
-    <div class="row" style="margin-bottom:40px; margin-top:40px; ">
+    <div id="StartButtonDIV" class="row" style="margin-bottom:40px; margin-top:40px; {% if needMoreSubjects %}display:none;{% endif %}">
       <div class="col-xs-5 ">
       </div>
       <div class="col-xs-2 ">
@@ -76,6 +81,33 @@
               }
           }
       });
+
+      {% if needMoreSubjects %}
+        var noActiveConnection = true;
+        var reloadInterval = setInterval ( function() {
+          if (noActiveConnection) {
+            noActiveConnection = false;
+            $.post( "{% url 'knapsack:index' %}", { experiment: {{ current_experiment }} },
+              function (data) {
+                noActiveConnection = true;
+                if (data.needMoreSubjects != 0) {
+                  $("#NeedMoreSubjectsDIV").show();
+                  $("#StartDescriptionDIV").hide();
+                  $("#StartButtonDIV").hide();
+                }
+                else {
+                  clearInterval(reloadInterval);
+                  $("#NeedMoreSubjectsDIV").hide();
+                  $("#StartDescriptionDIV").show();
+                  $("#StartButtonDIV").show();
+                 }
+              }, "json")
+              .fail ( function (request, status, error) {
+                alert( "Here! An error occurred. Please try again! If it happened again, please contact oneweb@umich.edu with details about the error and what you see on the webpage. request: " + request.responseText + ", request.responseText.d: " + request.responseText.d + ", status: " + status + ", error: " + error );
+              });
+          }
+        }, 1000);
+      {% endif %}
     });
 
   </script>

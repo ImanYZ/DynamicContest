@@ -76,13 +76,13 @@
           </ul>
         </div> -->
 
-        {% if username %}
-        <div id="navbar">
-          <div class="navbar-right">
-            <a class="navbar-brand" href="{% url 'knapsack:logout' %}">Logout</a>
-          </div>
-        </div>
-        {% endif %}
+{#        {% if username %}#}
+{#        <div id="navbar">#}
+{#          <div class="navbar-right">#}
+{#            <a class="navbar-brand" href="{% url 'knapsack:logout' %}">Logout</a>#}
+{#          </div>#}
+{#        </div>#}
+{#        {% endif %}#}
 
       </div>
     </nav>
@@ -119,7 +119,11 @@
         {% if participatedBefore %}
           <h1 style="color:#FFFFFF;">You have participated in this experiment before. You are not allowed to participate in this experiment more than once. Please inform one of the administrators of the experiment.</h1>
         {% else %}
-          {% block blockcontent %}{% endblock %}
+            {% if excessSubjects %}
+              <h1 style="color:#FFFFFF;">We are sorry! We have reached the limit for participants in the experiment. At this point, we cannot accept any new participants. Please feel free to participate in one of our future experiments.</h1>
+            {% else %}
+              {% block blockcontent %}{% endblock %}
+            {% endif %}
         {% endif %}
       {% endif %}
 

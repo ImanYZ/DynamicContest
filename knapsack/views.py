@@ -35,9 +35,9 @@ def login(request):
 
             if request.method == 'POST' and 'experiment' in request.POST:
                 current_experiment = request.POST['experiment']
+                experiment = Experiment.objects.get(vesion=current_experiment)
             else:
-                current_experiment = 5
-            experiment = Experiment.objects.get(vesion=current_experiment)
+                experiment = Experiment.objects.last()
             user = User.objects.filter(username=username)
             if len(user) != 0:
                 user = user.filter(experiment=experiment)
@@ -45,6 +45,13 @@ def login(request):
                 if len(user) == 0:
                     context = {'username': username, 'participatedBefore': 1}
                     return render(request, 'knapsack/index.html', context)
+            else:
+                usersInExperiment = User.objects.filter(experiment=experiment)
+                usersInExperimentNum = usersInExperiment.count()
+                if usersInExperimentNum >= experiment.total_participants_number:
+                    context = {'username': username, 'excessSubjects': 1}
+                    return render(request, 'knapsack/index.html', context)
+
             request.session['username'] = username
 
     return index(request)
@@ -69,10 +76,10 @@ def index(request):
     if request.session.get('username', False):
         if request.method == 'POST' and 'experiment' in request.POST:
             current_experiment = request.POST['experiment']
+            experiment = Experiment.objects.get(vesion=current_experiment)
         else:
-            current_experiment = 5
+            experiment = Experiment.objects.last()
         username = request.session['username']
-        experiment = Experiment.objects.get(vesion=current_experiment)
         user, created = User.objects.get_or_create(username=username, experiment=experiment)
         training_number = experiment.training_number
         training_earning = experiment.training_earning
@@ -91,9 +98,21 @@ def index(request):
         user.save()
         context = {'username': username, 'training_number': training_number, 'training_earning': round(training_earning),
                    'contest_number': contest_number, 'game_number': game_number, 'player_number': player_number - 1,
-                   'contest_earning': contest_earning, 'game_max_minutes': game_max_minutes, 'game_max_seconds': game_max_seconds,
+                   'contest_earning': contest_earning, 'game_max_minutes': game_max_minutes,
+                   'game_max_seconds': game_max_seconds, 'current_experiment': experiment.vesion,
                    'game_minutes_to_reveal': game_minutes_to_reveal, 'game_seconds_to_reveal': game_seconds_to_reveal,
-                   'total_minutes': total_minutes, 'total_seconds': total_seconds}
+                   'total_minutes': total_minutes, 'total_seconds': total_seconds,
+                   'total_participants_number': experiment.total_participants_number}
+        usersInExperiment = User.objects.filter(experiment=experiment)
+        usersInExperimentNum = usersInExperiment.count()
+        if usersInExperimentNum < experiment.total_participants_number:
+            context['needMoreSubjects'] = 1
+        else:
+            context['needMoreSubjects'] = 0
+        if request.method == 'POST' and 'experiment' in request.POST:
+            jsonResponseObj = JsonResponse(context)
+            # print ("\n\n\nJsonResponse.content " + str(jsonResponseObj.content))
+            return jsonResponseObj
     return render(request, 'knapsack/index.html', context)
 
 

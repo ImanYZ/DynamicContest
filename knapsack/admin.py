@@ -16,7 +16,7 @@ from .models import Userquitquestion
 
 class ExperimentAdmin(admin.ModelAdmin):
     list_display = ['vesion', 'training_number', 'contest_number', 'game_number', 'player_number',
-                    'training_earning', 'contest_earning', 'training_contest_earning',
+                    'total_participants_number', 'training_earning', 'contest_earning', 'training_contest_earning',
                     'game_max_minutes', 'game_max_seconds', 'game_minutes_to_reveal',
                     'game_seconds_to_reveal', 'total_minutes', 'total_seconds',
                     'total_training_minutes', 'total_training_seconds', 'initializing',
