@@ -817,8 +817,10 @@ def waitingroom(request):
             lastUser = False
             if (not user.waiting_for_game) and (usersInExperimentNum - usersWaitingNum == 1):
                 lastUser = True
-            user.waiting_for_game = True
-            user.save()
+            user = User.objects.get(username=username)
+            if user.waiting_for_game is False:
+                user.waiting_for_game = True
+                user.save()
 
             initializing = False
             if notGroupedYet is True:
@@ -871,6 +873,8 @@ def waitingroom(request):
                                    'otherPlayersNumWanted': 0, 'quit_question_earning': quit_question_earning,
                                    'contestIndex': currentContestIndex + 1}
                     # print("post and not initializing: " + str(initializing))
+                    # print("user: " + str(user))
+                    # print("user.group: " + str(user.group))
                     # print ("currentuserGame Duration: " + str((currentuserGame.finished - currentuserGame.started).total_seconds()))
                     jsonResponseObj = JsonResponse(context)
                     # print ("\n\n\nJsonResponse.content " + str(jsonResponseObj.content))
@@ -918,11 +922,16 @@ def waitingroom(request):
                             userInExperiment.group = groupCounter
                             userInExperiment.save()
                     # print("usersInExperiment: " + str(usersInExperiment))
+                    # for userCounter, userInExperiment in enumerate(usersInExperiment):
+                    #     print("userCounter: " + str(userCounter))
+                    #     print("userInExperiment: " + str(userInExperiment))
+                    #     print("userInExperiment.group: " + str(userInExperiment.group))
 
                     usersInExperimentTotal = []
                     for groupIndex in range(1,5):
                         usersInExperimentGroup = usersInExperiment.filter(group=groupIndex)
-                        playersPartitions = list(list(equipart(set(usersInExperimentGroup), player_number))[currentContestIndex - 1])
+                        # print("usersInExperimentGroup: " + str(usersInExperimentGroup))
+                        playersPartitions = list(list(equipart(set(usersInExperimentGroup), player_number))[currentContestIndex])
                         # print("playersPartitions: " + str(playersPartitions))
                         for playersPartition in playersPartitions:
                             for playerPartition in playersPartition:
@@ -933,7 +942,7 @@ def waitingroom(request):
                     # Creating partitions of sets such that each partition is the same length.
                     # E.g., equipart({1,2,3,4}, 2)
                     # [({1, 2}, {3, 4}), ({1, 3}, {2, 4}), ({1, 4}, {2, 3})]
-                    playersPartitions = list(list(equipart(set(usersInExperiment), player_number))[currentContestIndex - 1])
+                    playersPartitions = list(list(equipart(set(usersInExperiment), player_number))[currentContestIndex])
                     # print("playersPartitions: " + str(playersPartitions))
                     usersInExperiment = []
                     for playersPartition in playersPartitions:
@@ -1262,7 +1271,7 @@ def game(request):
                         inBag[item.item_index] = True
                     elif item.from_knapsack:
                         inBag[item.item_index] = False
-                print ("seconds_to_reveal: " + str(seconds_to_reveal))
+                # print ("seconds_to_reveal: " + str(seconds_to_reveal))
                 context = {'username': username, 'capacity': userGame.game.capacity,
                            'value_0': userGame.game.value_0, 'weight_0': userGame.game.weight_0,
                            'inBag_0': inBag[0],
@@ -1571,7 +1580,7 @@ def gamesubmit(request):
 
 
 def quitoption(request):
-    print("\n\nEntered Quit option.")
+    # print("\n\nEntered Quit option.")
     if request.method == 'GET':
         if request.session.get('username', False):
             username = request.session['username']
@@ -1584,7 +1593,7 @@ def quitoption(request):
             context = {'username': username, 'userGameId': request.GET['userGameId'],
                        'quit_question_earning': quit_question_earning}
             return render(request, 'knapsack/QuitQuestions.html', context)
-    print("\n\nEntered the if part.")
+    # print("\n\nEntered the if part.")
     context = {'username': ''}
     return render(request, 'knapsack/index.html', context)
 
