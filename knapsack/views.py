@@ -1817,7 +1817,7 @@ def downloadCSV(request, experiment, part):
         pseudo_buffer = Echo()
         writer = csv.writer(pseudo_buffer)
 
-        rows = generateCSVDataset(experiment, )
+        rows = generateCSVDataset(experiment, part)
 
         response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                          content_type="text/csv")
