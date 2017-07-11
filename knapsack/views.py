@@ -1806,7 +1806,7 @@ class Echo(object):
         return value
 
 
-def downloadCSV(request, part):
+def downloadCSV(request, experiment, part):
     if request.method == 'GET':
         """A view that streams a large CSV file."""
         # Generate a sequence of rows. The range is based on the maximum number of
@@ -1817,7 +1817,7 @@ def downloadCSV(request, part):
         pseudo_buffer = Echo()
         writer = csv.writer(pseudo_buffer)
 
-        rows = generateCSVDataset(part)
+        rows = generateCSVDataset(experiment, )
 
         response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                          content_type="text/csv")
