@@ -1828,10 +1828,10 @@ def downloadCSV(request, part):
     return render(request, 'knapsack/index.html', context)
 
 
-def generateCSVDataset(part):
+def generateCSVDataset(experiment, part):
     rows = []
-    experiment = Experiment.objects.get(vesion=2)
-    if part == "Pilot2":
+    experiment = Experiment.objects.get(vesion=experiment)
+    if part == "Main":
         headerRow = ['Experiment', 'Username', 'total_earning', 'total_training_score',
                      'total_game_score', 'started_study', 'finished_study', 'study_duration',
                      'age', 'male', 'female', 'siblings', 'major', 'undergraduate', 'graduate',
@@ -2038,7 +2038,7 @@ def generateCSVDataset(part):
                     row.append(int(usergame.opponentWon))
                     rows.append(row)
 
-    elif part == "Pilot2Items":
+    elif part == "Items":
         headerRow = ['Username', 'gameID', 'item_index',
                      'to_knapsack', 'from_knapsack', 'move_time']
         rows.append(headerRow)
@@ -2065,7 +2065,7 @@ def generateCSVDataset(part):
             row.append(usergameitem.move_time)
             rows.append(row)
 
-    elif part == "Pilot2GameSpecifications":
+    elif part == "GameSpecifications":
         headerRow = ['gameTypeID', 'capacity', 'value_0', 'weight_0', 'optimal_0',
                      'value_1', 'weight_1', 'optimal_1', 'value_2', 'weight_2', 'optimal_2',
                      'value_3', 'weight_3', 'optimal_3', 'value_4', 'weight_4', 'optimal_4',

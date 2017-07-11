@@ -29,5 +29,5 @@ urlpatterns = [
     url(r'^surveysubmit/$', views.surveysubmit, name='surveysubmit'),
     url(r'^final/$', views.final, name='final'),
     url(r'^deletegamesofexperiment/$', views.deletegamesofexperiment, name='deletegamesofexperiment'),
-    url(r'^(?i)downloadCSV/(?P<part>.+)', views.downloadCSV, name='downloadCSV'),
+    url(r'^(?i)downloadCSV/(?P<experiment>.+)/(?P<part>.+)', views.downloadCSV, name='downloadCSV'),
 ]
