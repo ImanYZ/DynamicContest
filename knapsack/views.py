@@ -1838,7 +1838,7 @@ def generateCSVDataset(experiment, part):
                      'notstudent', 'programyear', 'participatedbefore', 'white', 'asian',
                      'africanamerican', 'hispanic', 'multiracial', 'nativeamerican',
                      'otherethnicity', 'stickopinion', 'achievement', 'changeopinion', 'strategies', 'group', 'skill',
-                     'Contest_Num', 'Game_Type', 'Game_Order', 'rival', 'gameID', 'gameSpecificationID', 'difficulty', 'score', '# of Moves',
+                     'Contest_Num', 'Game_Type', 'Game_Order', 'rival', 'rival_skill', 'gameID', 'gameSpecificationID', 'difficulty', 'score', '# of Moves',
                      'started', 'finished', 'game_duration', 'submitted', 'infeasible', 'infeasiblility 20%', 'infeasiblility 40%',
                      'no_information', 'intermediate_information', 'complete_information',
                      'Quit', 'Found_Traget', 'Opponent_Found_Traget']
@@ -2018,6 +2018,7 @@ def generateCSVDataset(experiment, part):
                     for sameUsergame in sameUsergames:
                         if sameUsergame != usergame:
                             row.append(sameUsergame.user.username)
+                            row.append(sameUsergame.user.skill)
                     row.append(game.pk)
                     row.append(game.gametype.pk)
                     row.append(game.gametype.difficulty)
