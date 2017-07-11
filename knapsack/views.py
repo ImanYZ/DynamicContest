@@ -1918,6 +1918,7 @@ def generateCSVDataset(experiment, part):
                         row.append(0)
                         row.append(0)
                         row.append(0)
+                        row.append(0)
                         row.append(usertraining.game.pk)
                         row.append(usertraining.game.gametype.pk)
                         row.append(usertraining.game.gametype.difficulty)
@@ -1940,6 +1941,7 @@ def generateCSVDataset(experiment, part):
                     else:
                         contestusertraining = contestusertrainings[0]
                         row.append(contestusertraining.contest.index)
+                        row.append(0)
                         row.append(0)
                         row.append(0)
                         row.append(0)
