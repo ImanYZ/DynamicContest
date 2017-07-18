@@ -1838,7 +1838,8 @@ def generateCSVDataset(experiment, part):
                      'notstudent', 'programyear', 'participatedbefore', 'white', 'asian',
                      'africanamerican', 'hispanic', 'multiracial', 'nativeamerican',
                      'otherethnicity', 'stickopinion', 'achievement', 'changeopinion', 'strategies', 'group', 'skill',
-                     'Contest_Num', 'Game_Type', 'Game_Order', 'rival', 'rival_skill', 'gameID', 'gameSpecificationID', 'difficulty', 'score', 'score_ratio', 'contest_score_ratio', '# of Moves',
+                     'Contest_Num', 'Game_Type', 'Game_Order', 'rival', 'rival_skill', 'gameID', 'gameSpecificationID', 'difficulty', 
+                     'score', 'score_ratio', 'contest_difficulty', 'contest_score_ratio', 'contest_quit', '# of Moves',
                      'started', 'finished', 'game_duration', 'submitted', 'infeasible', 'infeasiblility 20%', 'infeasiblility 40%',
                      'no_information', 'intermediate_information', 'complete_information',
                      'Quit', 'Found_Traget', 'Opponent_Found_Traget']
@@ -1925,6 +1926,8 @@ def generateCSVDataset(experiment, part):
                         row.append(usertraining.score)
                         row.append(round(usertraining.score / usertraining.game.winning_score, 3))
                         row.append(0)
+                        row.append(0)
+                        row.append(0)
                         row.append(usertraining.usertrainingitem_set.count())
                         row.append(usertraining.started)
                         row.append(usertraining.finished)
@@ -1953,12 +1956,16 @@ def generateCSVDataset(experiment, part):
                         row.append(contestusertraining.usertraining.score)
                         row.append(round(contestusertraining.usertraining.score / contestusertraining.usertraining.game.winning_score, 3))
                         contestUserGames = Contestusergame.objects.filter(usergame__user=user, contest=contestusertraining.contest)
+                        contestDifficulty = 0
                         contestWiningScore = 0
                         contestScore = 0
                         for contestUserGame in contestUserGames:
+                        	contestDifficulty += contestUserGame.usergame.game.difficulty
                         	contestScore += contestUserGame.usergame.score
                         	contestWiningScore += contestUserGame.usergame.game.winning_score
+                        row.append(contestDifficulty)
                         row.append(round(contestScore / contestWiningScore, 3))
+                        row.append(1)
                         row.append(contestusertraining.usertraining.usertrainingitem_set.count())
                         row.append(contestusertraining.usertraining.started)
                         row.append(contestusertraining.usertraining.finished)
@@ -2037,12 +2044,19 @@ def generateCSVDataset(experiment, part):
                     row.append(usergame.score)
                     row.append(round(usergame.score / usergame.game.winning_score, 3))
                     contestUserGames = Contestusergame.objects.filter(usergame__user=user, contest=contestusergame.contest)
+                    contestDifficulty = 0
                     contestWiningScore = 0
                     contestScore = 0
+                    contestQuit = 0
                     for contestUserGame in contestUserGames:
+                    	contestDifficulty += contestUserGame.usergame.game.difficulty
                     	contestScore += contestUserGame.usergame.score
                     	contestWiningScore += contestUserGame.usergame.game.winning_score
+                    	if contestUserGame.usergame.quit == True:
+                    		contestQuit = 1
+                    row.append(contestDifficulty)
                     row.append(round(contestScore / contestWiningScore, 3))
+                    row.append(contestQuit)
                     row.append(usergame.usergameitem_set.count())
                     row.append(usergame.started)
                     row.append(usergame.finished)
