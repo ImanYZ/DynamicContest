@@ -1956,7 +1956,7 @@ def generateCSVDataset(experiment, part):
                         contestWiningScore = 0
                         contestScore = 0
                         for contestUserGame in contestUserGames:
-                        	contestScore += contestUserGame.score
+                        	contestScore += contestUserGame.usergame.score
                         	contestWiningScore += contestUserGame.usergame.game.winning_score
                         row.append(round(contestScore / contestWiningScore, 3))
                         row.append(contestusertraining.usertraining.usertrainingitem_set.count())
@@ -2040,7 +2040,7 @@ def generateCSVDataset(experiment, part):
                     contestWiningScore = 0
                     contestScore = 0
                     for contestUserGame in contestUserGames:
-                    	contestScore += contestUserGame.score
+                    	contestScore += contestUserGame.usergame.score
                     	contestWiningScore += contestUserGame.usergame.game.winning_score
                     row.append(round(contestScore / contestWiningScore, 3))
                     row.append(usergame.usergameitem_set.count())
