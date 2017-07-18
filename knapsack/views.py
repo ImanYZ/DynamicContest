@@ -2035,7 +2035,7 @@ def generateCSVDataset(experiment, part):
                     row.append(game.gametype.pk)
                     row.append(game.gametype.difficulty)
                     row.append(usergame.score)
-                    row.append(round(usergame.score / usergameg.game.winning_score, 3))
+                    row.append(round(usergame.score / usergame.game.winning_score, 3))
                     contestUserGames = Contestusergame.objects.filter(usergame__user=user, contest=contestusergame.contest)
                     contestWiningScore = 0
                     contestScore = 0
