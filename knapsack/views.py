@@ -1838,7 +1838,7 @@ def generateCSVDataset(experiment, part):
                      'notstudent', 'programyear', 'participatedbefore', 'white', 'asian',
                      'africanamerican', 'hispanic', 'multiracial', 'nativeamerican',
                      'otherethnicity', 'stickopinion', 'achievement', 'changeopinion', 'strategies', 'group', 'skill',
-                     'Contest_Num', 'Game_Type', 'Game_Order', 'rival', 'rival_skill', 'gameID', 'gameSpecificationID', 'difficulty', 'score', '# of Moves',
+                     'Contest_Num', 'Game_Type', 'Game_Order', 'rival', 'rival_skill', 'gameID', 'gameSpecificationID', 'difficulty', 'score', 'score_ratio', 'contest_score_ratio', '# of Moves',
                      'started', 'finished', 'game_duration', 'submitted', 'infeasible', 'infeasiblility 20%', 'infeasiblility 40%',
                      'no_information', 'intermediate_information', 'complete_information',
                      'Quit', 'Found_Traget', 'Opponent_Found_Traget']
@@ -1923,6 +1923,8 @@ def generateCSVDataset(experiment, part):
                         row.append(usertraining.game.gametype.pk)
                         row.append(usertraining.game.gametype.difficulty)
                         row.append(usertraining.score)
+                        row.append(round(usertraining.score / usertraining.game.winning_score, 3))
+                        row.append(0)
                         row.append(usertraining.usertrainingitem_set.count())
                         row.append(usertraining.started)
                         row.append(usertraining.finished)
@@ -1949,6 +1951,14 @@ def generateCSVDataset(experiment, part):
                         row.append(contestusertraining.usertraining.game.gametype.pk)
                         row.append(contestusertraining.usertraining.game.gametype.difficulty)
                         row.append(contestusertraining.usertraining.score)
+                        row.append(round(contestusertraining.usertraining.score / contestusertraining.usertraining.game.winning_score, 3))
+                        contestUserGames = Contestusergame.objects.filter(usergame__user=user, contest=contestusertraining.contest)
+                        contestWiningScore = 0
+                        contestScore = 0
+                        for contestUserGame in contestUserGames:
+                        	contestScore += contestUserGame.score
+                        	contestWiningScore += contestUserGame.game.winning_score
+                        row.append(round(contestScore / contestWiningScore, 3))
                         row.append(contestusertraining.usertraining.usertrainingitem_set.count())
                         row.append(contestusertraining.usertraining.started)
                         row.append(contestusertraining.usertraining.finished)
@@ -2025,6 +2035,14 @@ def generateCSVDataset(experiment, part):
                     row.append(game.gametype.pk)
                     row.append(game.gametype.difficulty)
                     row.append(usergame.score)
+                    row.append(round(usergame.score / usergameg.game.winning_score, 3))
+                    contestUserGames = Contestusergame.objects.filter(usergame__user=user, contest=contestusergame.contest)
+                    contestWiningScore = 0
+                    contestScore = 0
+                    for contestUserGame in contestUserGames:
+                    	contestScore += contestUserGame.score
+                    	contestWiningScore += contestUserGame.game.winning_score
+                    row.append(round(contestScore / contestWiningScore, 3))
                     row.append(usergame.usergameitem_set.count())
                     row.append(usergame.started)
                     row.append(usergame.finished)
