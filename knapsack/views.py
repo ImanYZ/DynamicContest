@@ -2074,7 +2074,7 @@ def generateCSVDataset(experiment, part):
                     rows.append(row)
 
     if part == "Contests":
-        headerRow = ['Experiment', 'Contest_Num', 'difficulty', 'score_ratio', 'complete', 'quit', 
+        headerRow = ['Experiment', 'Contest_Num', 'group', 'difficulty', 'score_ratio', 'complete', 'quit', 
                      'infeasible', 'infeasiblility 20%', 'infeasiblility 40%',
                      'no_information', 'intermediate_information', 'complete_information']
         rows.append(headerRow)
@@ -2107,6 +2107,7 @@ def generateCSVDataset(experiment, part):
                 contestWiningScore += contestusergame.usergame.game.winning_score
                 if contestusergame.usergame.quit == True:
                     contestQuit = 1
+            row.append(users[0].group)
             row.append(contestDifficulty)
             row.append(round(contestScore / contestWiningScore, 3))
             row.append(complete)
