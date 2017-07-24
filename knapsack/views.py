@@ -1960,9 +1960,9 @@ def generateCSVDataset(experiment, part):
                         contestWiningScore = 0
                         contestScore = 0
                         for contestUserGame in contestUserGames:
-                        	contestDifficulty += contestUserGame.usergame.game.difficulty
-                        	contestScore += contestUserGame.usergame.score
-                        	contestWiningScore += contestUserGame.usergame.game.winning_score
+                            contestDifficulty += contestUserGame.usergame.game.difficulty
+                            contestScore += contestUserGame.usergame.score
+                            contestWiningScore += contestUserGame.usergame.game.winning_score
                         row.append(contestDifficulty)
                         row.append(round(contestScore / contestWiningScore, 3))
                         row.append(1)
@@ -2049,11 +2049,11 @@ def generateCSVDataset(experiment, part):
                     contestScore = 0
                     contestQuit = 0
                     for contestUserGame in contestUserGames:
-                    	contestDifficulty += contestUserGame.usergame.game.difficulty
-                    	contestScore += contestUserGame.usergame.score
-                    	contestWiningScore += contestUserGame.usergame.game.winning_score
-                    	if contestUserGame.usergame.quit == True:
-                    		contestQuit = 1
+                        contestDifficulty += contestUserGame.usergame.game.difficulty
+                        contestScore += contestUserGame.usergame.score
+                        contestWiningScore += contestUserGame.usergame.game.winning_score
+                        if contestUserGame.usergame.quit == True:
+                            contestQuit = 1
                     row.append(contestDifficulty)
                     row.append(round(contestScore / contestWiningScore, 3))
                     row.append(contestQuit)
@@ -2072,6 +2072,46 @@ def generateCSVDataset(experiment, part):
                     row.append(int(usergame.youWon))
                     row.append(int(usergame.opponentWon))
                     rows.append(row)
+
+    if part == "Contests":
+        headerRow = ['Experiment', 'Contest_Num', 'difficulty', 'score_ratio', 'complete', 'quit', 
+                     'infeasible', 'infeasiblility 20%', 'infeasiblility 40%',
+                     'no_information', 'intermediate_information', 'complete_information']
+        rows.append(headerRow)
+
+        contests = Contest.objects.all()
+
+        for contest in contests:
+            row = [contest.experiment.vesion]
+            row.append(contest.index)
+            complete = 0
+            contestusergames = contest.contestusergame_set.all()
+            game_num = contest.experiment.game_number
+            if len(contestusergames) == game_num:
+                lastContestUserGame = contestusergames[game_num - 1]
+                if round(lastContestUserGame.usergame.score / lastContestUserGame.usergame.game.winning_score, 3) == 1:
+                    complete = 1
+            contestDifficulty = 0
+            contestWiningScore = 0
+            contestScore = 0
+            contestQuit = 0
+            for contestusergame in contestusergames:
+                contestDifficulty += contestusergame.usergame.game.difficulty
+                contestScore += contestusergame.usergame.score
+                contestWiningScore += contestusergame.usergame.game.winning_score
+                if contestusergame.usergame.quit == True:
+                    contestQuit = 1
+            row.append(contestDifficulty)
+            row.append(round(contestScore / contestWiningScore, 3))
+            row.append(complete)
+            row.append(contestQuit)
+            row.append(int(contest.infeasible))
+            row.append(int(contest.infeasiblility20Percent))
+            row.append(int(contest.infeasiblility40Percent))
+            row.append(int(contest.experiment.no_information))
+            row.append(int(contest.experiment.intermediate_information))
+            row.append(int(contest.experiment.complete_information))
+            rows.append(row)
 
     elif part == "Items":
         headerRow = ['Username', 'gameID', 'item_index',
