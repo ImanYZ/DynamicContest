@@ -2086,11 +2086,14 @@ def generateCSVDataset(experiment, part):
             row.append(contest.index)
             complete = 0
             contestusergames = contest.contestusergame_set.all()
+            users = contestusergames.usergame_set.user_set.all()
             game_num = contest.experiment.game_number
-            if len(contestusergames) == game_num:
-                lastContestUserGame = contestusergames[game_num - 1]
-                if round(lastContestUserGame.usergame.score / lastContestUserGame.usergame.game.winning_score, 3) == 1:
-                    complete = 1
+            for user in users:
+                usergames = contestusergames.usergame_set.filter(user=user)
+                if len(usergames) == game_num:
+                    lastusergames = usergames[game_num - 1]
+                    if round(lastusergames.score / lastusergames.game.winning_score, 3) == 1:
+                        complete = 1
             contestDifficulty = 0
             contestWiningScore = 0
             contestScore = 0
