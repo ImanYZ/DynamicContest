@@ -2074,7 +2074,7 @@ def generateCSVDataset(experiment, part):
                     rows.append(row)
 
     if part == "Contests":
-        headerRow = ['Experiment', 'Contest_Num', 'group', 'difficulty', 'score_ratio', 'complete', 'quit', 
+        headerRow = ['Experiment', 'Contest_Num', 'group', 'complete', 'quit', 
                      'infeasible', 'infeasiblility 20%', 'infeasiblility 40%',
                      'no_information', 'intermediate_information', 'complete_information']
         rows.append(headerRow)
@@ -2087,8 +2087,11 @@ def generateCSVDataset(experiment, part):
             complete = 0
             contestusergames = contest.contestusergame_set.all()
             game_num = contest.experiment.game_number
+            contestQuit = 0
             users = []
             for contestusergame in contestusergames:
+                if contestusergame.usergame.quit == True:
+                    contestQuit = 1
                 thisUser = contestusergame.usergame.user
                 if thisUser not in users:
                     users.append(thisUser)
@@ -2097,19 +2100,7 @@ def generateCSVDataset(experiment, part):
                         lastcontestusergame = thiscontestusergames[game_num - 1]
                         if round(lastcontestusergame.usergame.score / lastcontestusergame.usergame.game.winning_score, 3) == 1:
                             complete = 1
-            contestDifficulty = 0
-            contestWiningScore = 0
-            contestScore = 0
-            contestQuit = 0
-            for contestusergame in contestusergames:
-                contestDifficulty += contestusergame.usergame.game.difficulty
-                contestScore += contestusergame.usergame.score
-                contestWiningScore += contestusergame.usergame.game.winning_score
-                if contestusergame.usergame.quit == True:
-                    contestQuit = 1
             row.append(users[0].group)
-            row.append(contestDifficulty)
-            row.append(round(contestScore / contestWiningScore, 3))
             row.append(complete)
             row.append(contestQuit)
             row.append(int(contest.infeasible))
