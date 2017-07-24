@@ -2092,7 +2092,7 @@ def generateCSVDataset(experiment, part):
                 thisUser = contestusergame.usergame.user
                 if thisUser not in users:
                     users.append(thisUser)
-                    thiscontestusergames = contest.contestusergame_set.filter(usergame__user=user)
+                    thiscontestusergames = Contestusergame.objects.filter(usergame__user=user, contest=contest)
                     if len(thiscontestusergames) == game_num:
                         lastcontestusergame = thiscontestusergames[game_num - 1]
                         if round(lastcontestusergame.usergame.score / lastcontestusergame.usergame.game.winning_score, 3) == 1:
