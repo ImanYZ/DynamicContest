@@ -2081,7 +2081,7 @@ def generateCSVDataset(experiment, part):
                     rows.append(row)
 
     if part == "Contests":
-        headerRow = ['Experiment', 'Contest_Num', 'group', 'complete', 'quit', 
+        headerRow = ['Experiment', 'Contest_Num', 'group', 'complete', 'quit', 'contestDuration',
                      'infeasible', 'infeasiblility 20%', 'infeasiblility 40%',
                      'no_information', 'intermediate_information', 'complete_information']
         rows.append(headerRow)
@@ -2096,7 +2096,9 @@ def generateCSVDataset(experiment, part):
             game_num = contest.experiment.game_number
             contestQuit = 0
             users = []
+            contestDuration = 0
             for contestusergame in contestusergames:
+                contestDuration += (contestusergame.usergame.finished - contestusergame.usergame.started).total_seconds()
                 if contestusergame.usergame.quit == True:
                     contestQuit = 1
                 thisUser = contestusergame.usergame.user
@@ -2110,6 +2112,7 @@ def generateCSVDataset(experiment, part):
             row.append(users[0].group)
             row.append(complete)
             row.append(contestQuit)
+            row.append(contestDuration)
             row.append(int(contest.infeasible))
             row.append(int(contest.infeasiblility20Percent))
             row.append(int(contest.infeasiblility40Percent))
